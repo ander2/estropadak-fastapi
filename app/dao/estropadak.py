@@ -4,7 +4,7 @@ import logging
 from .models.estropadak import Estropada
 from .models.sailkapenak import Sailkapena
 from .db_connection import get_db_connection
-from config import PAGE_SIZE
+from app.config import PAGE_SIZE
 from typing import Dict, List
 
 logger = logging.getLogger('estropadak')
@@ -57,7 +57,7 @@ class EstropadakDAO:
                                                raw_result=True,
                                                reduce=True)
                 rows = res.get('rows', [{'value': 0}])
-                if len(rows) > 0: 
+                if len(rows) > 0:
                     doc_count = rows[0]['value']
                 else:
                     doc_count = 0
@@ -98,7 +98,7 @@ class EstropadakDAO:
             try:
 
                 _count = database.get_view_result(
-                    "estropadak", 
+                    "estropadak",
                     "by_year",
                     raw_result=True,
                     startkey=start,
@@ -106,14 +106,14 @@ class EstropadakDAO:
                     reduce=True)
                 logging.info(f"Total:{_count}")
                 rows = _count.get('rows', [{'value': 0}])
-                if len(rows) > 0: 
+                if len(rows) > 0:
                     doc_count = rows[0]['value']
                 else:
                     doc_count = 0
                     result = []
                 if doc_count > 0:
                     estropadak = database.get_view_result(
-                        "estropadak", 
+                        "estropadak",
                         "by_year",
                         raw_result=True,
                         startkey=start,
@@ -140,17 +140,17 @@ class EstropadakDAO:
     def get_estropadak(**kwargs):
         if kwargs.get('year') and kwargs.get('league'):
             return EstropadakDAO.get_estropadak_by_league_year(
-                kwargs['league'], 
-                kwargs['year'], 
-                kwargs['page'], 
+                kwargs['league'],
+                kwargs['year'],
+                kwargs['page'],
                 kwargs['count'])
         elif kwargs.get('year') and not kwargs.get('league'):
             return EstropadakDAO.get_estropadak_by_year(kwargs.pop('year'), **kwargs)
         elif kwargs.get('league') and not kwargs.get('year'):
             return EstropadakDAO.get_estropadak_by_league_year(
-                kwargs['league'], 
-                None, 
-                kwargs['page'], 
+                kwargs['league'],
+                None,
+                kwargs['page'],
                 kwargs['count'])
         else:
             return EstropadakDAO.get_estropadak_by_league_year(None, None)

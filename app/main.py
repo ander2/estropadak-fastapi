@@ -7,12 +7,13 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi_jwt import JwtAccessBearer
-from config import config, JWT_SECRET_KEY
+from app.config import config, JWT_SECRET_KEY
 from .models.login import Login
 from .routes.estropadak import router as estropadak_router
 from .routes.emaitzak import router as emaitzak_router
 from .routes.sailkapenak import router as sailkapenak_router
 from .routes.taldeak import router as taldeak_router
+from .routes.years import router as year_router
 
 
 api = FastAPI()
@@ -22,6 +23,7 @@ api.include_router(estropadak_router)
 api.include_router(emaitzak_router)
 api.include_router(sailkapenak_router)
 api.include_router(taldeak_router)
+api.include_router(year_router)
 
 
 @api.exception_handler(RequestValidationError)
@@ -41,7 +43,7 @@ async def root():
 @api.post("/auth")
 async def auth(login: Login):
     params = urllib.parse.urlencode({
-        "username": login.username, 
+        "username": login.username,
         "password": login.password
     })
     headers = {
@@ -58,15 +60,9 @@ async def auth(login: Login):
         if 'error' in res:
             return {}
         else:
-            # res['id'] = res['name']
-            # user = Ident(res['name'], res)
-            # users_dict[res['name']] = user
             subject = {"username": login.username, "role": "user"}
             access_token = access_security.create_access_token(subject=subject)
-            # refresh_token = refresh_security.create_refresh_token(subject=subject)
-
-            # , "refresh_token": refresh_token
-            return {"access_token": access_token} 
+            return {"access_token": access_token}
     else:
         return {}
 

@@ -1,7 +1,7 @@
 import time
 import contextlib
 from cloudant.client import CouchDB
-from config import config
+from app.config import config
 
 
 @contextlib.contextmanager

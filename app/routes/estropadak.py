@@ -2,13 +2,13 @@ import logging
 import http.client
 
 from typing import Any
-from config import config, PAGE_SIZE, JWT_SECRET_KEY
+from app.config import config, PAGE_SIZE, JWT_SECRET_KEY
 from fastapi import APIRouter, HTTPException, Security, Response, status
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
 
 from ..dao.estropadak import EstropadakDAO
 from ..logic.estropadak import EstropadakLogic
-from ..models.estropadak import Estropada, EstropadakList, EstropadaTypeEnum 
+from ..models.estropadak import Estropada, EstropadakList, EstropadaTypeEnum
 
 access_security = JwtAccessBearer(secret_key=JWT_SECRET_KEY, auto_error=True)
 

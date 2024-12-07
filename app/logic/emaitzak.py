@@ -1,17 +1,27 @@
 from ..dao.models.estropadak import Estropada
-from ..dao.models.sailkapenak import Sailkapena, SailkapenaDoc
+from ..dao.models.sailkapenak import SailkapenaDoc
 from ..dao.emaitzak import EmaitzakDAO
 from ..dao.taldeak import TaldeakDAO
 
 
 class EmaitzakLogic:
     @staticmethod
-    def update_emaitza(emaitza_id, emaitza):
-        pass
-        # emaitza['type'] = 'emaitza'
-        # talde_izen_normalizatua = TaldeakDAO.get_talde_izen_normalizatua(emaitza['talde_izena'])
-        # emaitza['talde_izen_normalizatua'] = talde_izen_normalizatua
-        # return EmaitzakDAO.update_emaitza_into_db(emaitza_id, emaitza)
+    def create_emaitza(emaitza: dict):
+        talde_izen_normalizatua = TaldeakDAO.get_talde_izen_normalizatua(emaitza['talde_izena'])
+        izena = talde_izen_normalizatua.replace(' ', '-')
+        emaitza['_id'] = f'{emaitza['estropada_data'].strftime("%Y-%m-%d")}_{emaitza["liga"].value}_{izena}'
+        del emaitza['id']
+        emaitza_ = SailkapenaDoc(**emaitza)
+        doc_created = EmaitzakDAO.insert_emaitza_into_db(emaitza_)
+        return doc_created
+
+    @staticmethod
+    def update_emaitza(emaitza_id: str, emaitza: dict):
+        del emaitza['id']
+        emaitza['_id'] = emaitza_id
+        emaitza_ = SailkapenaDoc(**emaitza)
+        doc_updated = EmaitzakDAO.update_emaitza_into_db(emaitza_id, emaitza_)
+        return doc_updated
 
     @staticmethod
     def create_emaitzak_from_estropada(estropada: Estropada):

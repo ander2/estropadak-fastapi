@@ -1,10 +1,9 @@
-import datetime
+import logging
 
 from ..dao.db_connection import get_db_connection
 from ..dao.models.sailkapenak import SailkapenaDoc
-# from ..resources.common.utils import estropadak_transform
-from ..dao.taldeak import TaldeakDAO
 
+logger = logging.getLogger('estropadak')
 
 class EmaitzakDAO:
 
@@ -51,7 +50,6 @@ class EmaitzakDAO:
         with get_db_connection() as database:
             try:
                 estropadak = database.view("estropadak/by_team",
-                                           estropadak_transform,
                                            startkey=start,
                                            endkey=end,
                                            include_docs=True,
@@ -77,7 +75,7 @@ class EmaitzakDAO:
             try:
                 for emaitza in emaitzak:
                     total = total + 1
-                emaitzak = database.get_query_result(criteria)
+                # emaitzak = database.get_query_result(criteria)
                 docs = emaitzak[start:end]
             except IndexError:
                 return {'error': 'Bad pagination'}, 400
@@ -85,16 +83,19 @@ class EmaitzakDAO:
 
     @staticmethod
     def insert_emaitza_into_db(emaitza: SailkapenaDoc):
+        emaitza_ = emaitza.dump_dict()
+        logger.debug(emaitza_)
         with get_db_connection() as database:
-            document = database.create_document(emaitza.dump_dict())
+            document = database.create_document(emaitza_)
             return document.exists()
 
     @staticmethod
     def update_emaitza_into_db(emaitza_id, emaitza):
+        emaitza_ = emaitza.dump_dict()
         with get_db_connection() as database:
             document = database[emaitza_id]
             if document.exists():
-                document.update(emaitza)
+                document.update(emaitza_)
                 document.save()
                 return document.exists()
             else:

@@ -1,14 +1,14 @@
 import logging
 from typing import Any, Annotated
 
-from config import config, PAGE_SIZE, JWT_SECRET_KEY
+from app.config import config, PAGE_SIZE, JWT_SECRET_KEY
 from fastapi import APIRouter, HTTPException, Security, Response, status, Query
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
 from app.models.estropadak import EstropadaTypeEnum
 from app.models.sailkapenak import Sailkapena, SailkapenakList
 from ..logic.sailkapenak import (
     create_sailkapena,
-    get_sailkapena as get_sailkapena_logic, 
+    get_sailkapena as get_sailkapena_logic,
     update_sailkapena as update_sailkapena_logic
 )
 from ..dao.sailkapenak import (
@@ -31,7 +31,7 @@ router = APIRouter(
 
 @router.get("/", response_model=SailkapenakList)
 async def get_sailkapenak(
-    year: int | None = None, 
+    year: int | None = None,
     league: EstropadaTypeEnum | None = None,
     teams: Annotated[list[str] | None, Query()] = None,
     category=None
@@ -75,7 +75,7 @@ async def get_sailkapena(sailkapena_id: str) -> Sailkapena:
 
 
 @router.put("/{sailkapena_id}", response_model=Sailkapena)
-async def put_sailkapena(sailkapena_id: str, 
+async def put_sailkapena(sailkapena_id: str,
                          sailkapena: Sailkapena,
                          credentials: JwtAuthorizationCredentials = Security(access_security),
                          ) -> Sailkapena:

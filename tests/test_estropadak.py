@@ -3,7 +3,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from app.main import api as app
-from config import PAGE_SIZE
+from app.config import PAGE_SIZE
 
 client = TestClient(app)
 

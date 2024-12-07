@@ -26,12 +26,16 @@ class Sailkapena:
         }
         if hasattr(self, 'kategoria') and self.kategoria:
             tanda_obj['kategoria'] = self.kategoria
+        if hasattr(self, 'estropada_data'):
+            tanda_obj['estropada_data'] = self.estropada_data.toisostring()
         return tanda_obj
-    
+
     def dump_dict(self):
         doc = self.__dict__
         if '_rev' in doc and not doc['_rev']:
             del doc['_rev']
+        if hasattr(self, 'estropada_data'):
+            doc['estropada_data'] = self.estropada_data.isoformat()
         return doc
 
 
@@ -39,18 +43,9 @@ class Sailkapena:
 class SailkapenaDoc(Sailkapena):
     _id: str | None = None
     _rev: str | None = None
-    type: str
+    type: str = 'emaitza'
     estropada_data: str
     estropada_izena: str
     estropada_id: str
     liga: str
     talde_izen_normalizatua: str
-    # talde_izena: str
-    # kalea: int
-    # tanda: int
-    # tanda_postua: int
-    # denbora: str
-    # posizioa: int
-    # puntuazioa: int
-    # kategoria: str | None = None
-    # ziabogak: list[str] = field(default_factory=list)
