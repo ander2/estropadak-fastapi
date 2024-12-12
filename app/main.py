@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from fastapi_jwt import JwtAccessBearer
 from app.config import config, JWT_SECRET_KEY
 from .models.login import Login
+from .routes.estatistikak import router as estatistikak_router
 from .routes.estropadak import router as estropadak_router
 from .routes.emaitzak import router as emaitzak_router
 from .routes.sailkapenak import router as sailkapenak_router
@@ -19,6 +20,7 @@ from .routes.years import router as year_router
 api = FastAPI()
 access_security = JwtAccessBearer(secret_key=JWT_SECRET_KEY, auto_error=True)
 
+api.include_router(estatistikak_router)
 api.include_router(estropadak_router)
 api.include_router(emaitzak_router)
 api.include_router(sailkapenak_router)
