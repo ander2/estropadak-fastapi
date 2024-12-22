@@ -31,7 +31,7 @@ class EmaitzakLogic:
             id = f'{estropada.data.strftime("%Y-%m-%d")}_{estropada.liga}_{izena}'
             emaitza_ = SailkapenaDoc(
                 _id=id,
-                estropada_data=estropada.data.isoformat(),
+                estropada_data=estropada.data,
                 estropada_izena=estropada.izena,
                 estropada_id=estropada._id,
                 liga=estropada.liga,

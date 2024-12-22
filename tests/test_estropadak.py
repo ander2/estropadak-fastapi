@@ -235,7 +235,7 @@ def test_estropada_creation_with_sailkapena(credentials):
     token = rv.json()['access_token']
     rv = client.post('/estropadak', json={
         "izena": "Estropada test",
-        "data": "2021-06-01 17:00",
+        "data": "2021-06-01T17:00:00",
         "liga": "ACT",
         "sailkapena": [{
             "talde_izena": "KAIKU",

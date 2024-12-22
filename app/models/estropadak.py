@@ -1,10 +1,10 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import BaseModel
 from datetime import datetime
 
 
-class EstropadaTypeEnum(str, Enum):
+class EstropadaTypeEnum(StrEnum):
     ACT = 'ACT'
     ARC1 = 'ARC1'
     ARC2 = 'ARC2'
@@ -23,7 +23,7 @@ class Estropada(BaseModel):
     sailkapena: list = []
     bi_jardunaldiko_bandera: bool = False
     jardunaldia: int = 1
-    bi_eguneko_sailkapena: list = [] 
+    bi_eguneko_sailkapena: list = []
     related_estropada: str | None = None
     urla: str | None = None
     puntuagarria: bool =True

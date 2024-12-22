@@ -1,4 +1,4 @@
-import datetime 
+import datetime
 import logging
 
 from ..models.estropadak import Estropada
@@ -16,14 +16,14 @@ class EstropadakLogic():
         id = f'{estropada.data.strftime("%Y-%m-%d")}_{estropada.liga.value}_{izena}'
         if len(estropada.sailkapena) > 0:
             sailkapena = [Sailkapena(**sailkapena) for sailkapena in estropada.sailkapena]
-            delattr(estropada, 'sailkapena') 
+            delattr(estropada, 'sailkapena')
         else:
             sailkapena = []
-            delattr(estropada, 'sailkapena') 
+            delattr(estropada, 'sailkapena')
         estropada_ = EstropadaModel(
-            _id=id, 
-            type=type, 
-            sailkapena=sailkapena, 
+            _id=id,
+            type=type,
+            sailkapena=sailkapena,
             **estropada.model_dump(exclude_unset=True)
         )
         # data = None
