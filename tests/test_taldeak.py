@@ -15,6 +15,12 @@ def testTaldeak():
     assert all(['alt_names' in taldea for taldea in taldeak])
     assert all(['short' in taldea for taldea in taldeak])
 
+def test_taldeak_by_league():
+    rv = client.get('/taldeak?league=ACT')
+    assert rv.status_code == 200
+    taldeak = rv.json()
+    assert len(taldeak) == 26
+
 
 @pytest.mark.parametrize('year, league',
                          [('aaa', 'ACT'),

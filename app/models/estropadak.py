@@ -13,6 +13,7 @@ class EstropadaTypeEnum(StrEnum):
     euskotren = 'euskotren'
     KONTXA = 'KONTXA'
     GBL = 'GBL'
+    BBL = 'BBL'
     BTL = 'BTL'
     GTL = 'GTL'
     TXAPELKETAK = 'TXAPELKETAK'
