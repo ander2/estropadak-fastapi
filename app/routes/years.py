@@ -28,12 +28,12 @@ def get_all_years(historial: bool = False, year: int = 2010) -> list[Year]:
             if historial:
                 if year > 2009:
                     result.append({
-                        'name': k,
+                        'name': k.upper(),
                         'years': v
                     })
             else:
                 result.append({
-                    'name': k,
+                    'name': k.upper(),
                     'years': v
                 })
     return result

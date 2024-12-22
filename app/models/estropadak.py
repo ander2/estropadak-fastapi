@@ -12,6 +12,10 @@ class EstropadaTypeEnum(StrEnum):
     EUSKOTREN = 'EUSKOTREN'
     euskotren = 'euskotren'
     KONTXA = 'KONTXA'
+    GBL = 'GBL'
+    BTL = 'BTL'
+    GTL = 'GTL'
+    TXAPELKETAK = 'TXAPELKETAK'
 
 
 class Estropada(BaseModel):

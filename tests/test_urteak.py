@@ -1,9 +1,7 @@
-import json
 import logging
-import pytest
 
 from fastapi.testclient import TestClient
-from app.config import LEAGUES
+from app.models.estropadak import EstropadaTypeEnum
 from app.main import api as app
 
 client = TestClient(app)
@@ -14,16 +12,15 @@ def testYears():
     rv = client.get('/years')
     assert rv.status_code == 200
     years = rv.json()
-    supported_leagues = ['act', 'arc1', 'arc2', 'euskotren', 'ete', 'gbl', 'bbl', 'gtl', 'btl', 'txapelketak']
     for res in years:
-        assert res['name'] in supported_leagues
-        if res['name'] == 'act':
-            assert min(res['years']) > 2002
-        elif res['name'] == 'arc1' or res['name'] == 'arc2':
+        assert res['name'] in EstropadaTypeEnum
+        if res['name'] == EstropadaTypeEnum.ACT:
+            assert min(res['years']) > 200
+        elif res['name'] == EstropadaTypeEnum.ARC1 or res['name'] == EstropadaTypeEnum.ARC2:
             assert min(res['years']) > 2005
-        elif res['name'] == 'euskotren':
+        elif res['name'] == EstropadaTypeEnum.EUSKOTREN:
             assert min(res['years']) > 2008
-        elif res['name'] == 'ete':
+        elif res['name'] == EstropadaTypeEnum.ETE:
             assert min(res['years']) > 2017
 
 
