@@ -19,7 +19,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=EstropadakList)
+@router.get("", response_model=EstropadakList)
 async def get_estropadak(year: int | None = None, league: EstropadaTypeEnum | None = None, page: int = 0, count: int | None = PAGE_SIZE) -> Any:
     kwargs = {}
     if year:
@@ -34,7 +34,7 @@ async def get_estropadak(year: int | None = None, league: EstropadaTypeEnum | No
     return estropadak
 
 
-@router.post("/", response_model=Estropada, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=Estropada, status_code=status.HTTP_201_CREATED)
 async def post_estropada(
     estropada: Estropada,
     credentials: JwtAuthorizationCredentials = Security(access_security),
