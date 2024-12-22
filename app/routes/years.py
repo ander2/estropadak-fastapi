@@ -19,7 +19,7 @@ router = APIRouter(
 )
 
 
-@router.get('/')
+@router.get('')
 def get_all_years(historial: bool = False, year: int = 2010) -> list[Year]:
     all_years = YearsDAO.get_years_from_db()
     result = []

@@ -18,7 +18,7 @@ router = APIRouter(
     responses={404: {"description": "Not found"}}
 )
 
-@router.get('/')
+@router.get('')
 def get_estatistikak(stat: EstatistikaTypeEnum,
                      league: EstropadaTypeEnum | None = None,
                      year: int | None = None,

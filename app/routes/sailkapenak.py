@@ -29,7 +29,7 @@ router = APIRouter(
 )
 
 
-@router.get("/", response_model=SailkapenakList)
+@router.get("", response_model=SailkapenakList)
 async def get_sailkapenak(
     year: int | None = None,
     league: EstropadaTypeEnum | None = None,
@@ -90,7 +90,7 @@ async def delete_sailkapena(
     delete_sailkapena_from_db(sailkapena_id)
 
 
-@router.post("/", response_model=Sailkapena, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=Sailkapena, status_code=status.HTTP_201_CREATED)
 def post_sailkapenak(
     sailkapena: Sailkapena,
     credentials: JwtAuthorizationCredentials = Security(access_security)

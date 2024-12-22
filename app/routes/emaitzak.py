@@ -19,7 +19,7 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/")
+@router.get("")
 def get_emaitzak(criteria: str = '', page: int = 0, count: int = PAGE_SIZE):
     try:
         criteria = json.loads(criteria)
@@ -32,7 +32,7 @@ def get_emaitzak(criteria: str = '', page: int = 0, count: int = PAGE_SIZE):
         logging.info("Error", exc_info=1)
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Estropadak not found")
 
-@router.post("/", status_code=201)
+@router.post("", status_code=201)
 def post_emaitza(
     emaitza: Emaitza,
     credentials: JwtAuthorizationCredentials = Security(access_security),

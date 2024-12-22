@@ -15,7 +15,7 @@ router = APIRouter(
 )
 
 
-@router.get('/')
+@router.get('')
 def get_taldeak(year: int, league: EstropadaTypeEnum, category: str | None = None):
     teams = []
     # if league.upper() not in ('GBL', 'GTL', 'BBL', 'BTL'):
