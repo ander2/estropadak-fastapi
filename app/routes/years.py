@@ -7,7 +7,7 @@ from app.config import config, PAGE_SIZE, JWT_SECRET_KEY
 from app.models.estropadak import EstropadaTypeEnum
 from app.models.years import Year, YearPutModel
 from app.dao.years import YearsDAO
-from app.config import LEAGUES
+
 
 access_security = JwtAccessBearer(secret_key=JWT_SECRET_KEY, auto_error=True)
 logger = logging.getLogger('estropadak')
@@ -24,7 +24,7 @@ def get_all_years(historial: bool = False, year: int = 2010) -> list[Year]:
     all_years = YearsDAO.get_years_from_db()
     result = []
     for k, v in all_years.items():
-        if k.upper() in LEAGUES or k == 'euskotren':
+        if k.upper() in EstropadaTypeEnum or k == 'euskotren':
             if historial:
                 if year > 2009:
                     result.append({
