@@ -1,5 +1,6 @@
 import http.client
 import json
+import logging
 import urllib
 
 from fastapi import FastAPI, status
@@ -15,10 +16,12 @@ from .routes.emaitzak import router as emaitzak_router
 from .routes.sailkapenak import router as sailkapenak_router
 from .routes.taldeak import router as taldeak_router
 from .routes.years import router as year_router
+from .dao.years import get_active_year
 
 
 api = FastAPI()
 access_security = JwtAccessBearer(secret_key=JWT_SECRET_KEY, auto_error=True)
+logger = logging.getLogger('estropadak')
 
 api.include_router(estatistikak_router)
 api.include_router(estropadak_router)
@@ -68,3 +71,10 @@ async def auth(login: Login):
     else:
         return {}
 
+@api.get('/active_year')
+async def active_year_get() -> int:
+    try:
+        return get_active_year()
+    except Exception as e:
+        logger.error(f"Cannot retrieve active year:{e}")
+        raise RuntimeError(e)

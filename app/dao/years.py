@@ -16,3 +16,9 @@ class YearsDAO:
             else:
                 doc = years
             doc.save()
+
+
+def get_active_year():
+    with get_db_connection() as database:
+        doc = database['active_year']
+        return doc['year']
