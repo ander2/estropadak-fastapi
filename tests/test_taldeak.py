@@ -27,6 +27,6 @@ def test_taldeak_by_league():
                           ('', 'AT'),
                           (2015, 1),
                           (2015, 'ATC')])
-def testTaldeakInvalidParams(year, league):
+def test_taldeak_invalid_params(year, league):
     rv = client.get(f'/taldeak?league={league}&year={year}')
     assert rv.status_code == 400

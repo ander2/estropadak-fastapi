@@ -28,7 +28,7 @@ def clean_up():
                 pass
 
 
-def testEmaitzakByCriteria():
+def test_emaitzak_by_criteria():
     query = {
         "type": "emaitza",
         "liga": "ACT",
@@ -49,12 +49,12 @@ def testEmaitzakByCriteria():
     assert len(emaitzak['docs']) == 20
 
 
-def testEmaitzakByBadCriteria():
+def test_emaitzak_by_bad_criteria():
     rv = client.get(f'/emaitzak?criteria={"foo"}')
     assert rv.status_code == 400
 
 
-def testEmaitzakByCriteriaPagination():
+def test_emaitzak_by_criteria_pagination():
     query = {
         "type": "emaitza",
         "liga": "ACT",
@@ -93,7 +93,7 @@ def testEmaitzakByCriteriaBadPagination():
     assert rv.status_code == 400
 
 
-def testEmaitzakCreationWithoutCredentials():
+def test_emaitzak_creation_without_credentials():
     emaitza_data = {
         "talde_izena": "SAN JUAN",
         "tanda_postua": 2,
@@ -117,7 +117,7 @@ def testEmaitzakCreationWithoutCredentials():
     assert rv.status_code == 401
 
 
-def testEmaitzakCreationWithCredentials(credentials, clean_up):
+def test_emaitzak_creation_with_credentials(credentials, clean_up):
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
     emaitza_data = {
@@ -150,7 +150,7 @@ def testEmaitzakCreationWithCredentials(credentials, clean_up):
     assert rv.status_code == 200
 
 
-def testEmaitzakCreationWithInvalidData(credentials):
+def test_emaitzak_creation_with_invalid_data(credentials):
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
     emaitza_data = {
@@ -178,7 +178,7 @@ def testEmaitzakCreationWithInvalidData(credentials):
     assert rv.status_code == 400
 
 
-def testEmaitzakModificationWithoutCredentials(credentials, clean_up):
+def test_emaitzak_modification_without_credentials(credentials, clean_up):
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
     emaitza_data = {
@@ -214,7 +214,7 @@ def testEmaitzakModificationWithoutCredentials(credentials, clean_up):
     assert rv.status_code == 401
 
 
-def testEmaitzakModificationWithCredentials(credentials, clean_up):
+def test_emaitzak_modification_with_credentials(credentials, clean_up):
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
     emaitza_data = {
@@ -259,7 +259,7 @@ def testEmaitzakModificationWithCredentials(credentials, clean_up):
     assert emaitza['kalea'] == 3
 
 
-def testEmaitzakDeletion(credentials, clean_up):
+def test_emaitzak_deletion(credentials, clean_up):
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
     emaitza_data = {

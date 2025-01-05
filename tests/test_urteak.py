@@ -8,7 +8,7 @@ client = TestClient(app)
 logger = logging.getLogger('estropadak')
 
 
-def testYears():
+def test_years():
     rv = client.get('/years')
     assert rv.status_code == 200
     years = rv.json()
@@ -24,26 +24,26 @@ def testYears():
             assert min(res['years']) > 2017
 
 
-def testYearsByLeague():
+def test_years_by_league():
     rv = client.get('/years/ACT')
     res = rv.json()
     assert len(res['years']) > 0
 
 
-def testYearsPutProtectedEndpointWithoutCredentials():
+def test_years_put_protected_endpoint_without_credentials():
     rv = client.put('/years/ACT', json={'urteak': list(range(2003, 2022))})
     logger.debug(rv.text)
     assert rv.status_code == 401
 
 
-def testYearsPutProtectedEndpoint(credentials):
+def test_years_put_protected_endpoint(credentials):
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
     rv = client.put('/years/ACT', json={'urteak': list(range(2003, 2022))}, headers=[('Authorization', f'Bearer {token}')])
     assert rv.status_code == 200
 
 
-def testYearsPutBadParams(credentials):
+def test_years_put_bad_params(credentials):
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
     # Bad param name
