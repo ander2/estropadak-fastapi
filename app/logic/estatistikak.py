@@ -54,10 +54,10 @@ def get_culumative_stats(league, year, team, category):
 def get_points_per_race(league: str, year: int, category: str):
     result = []
     sailkapena = estatistikak.get_sailkapena_by_league_year(league, year, category)
-    estropadak = estropadak.get_estropadak_by_league_year(
+    estropadak_ = estropadak.get_estropadak_by_league_year(
         league,
         year)
-    estropadak = [estropada for estropada in estropadak['docs'] if not estropada['izena'].startswith('Play')]
+    estropadak_ = [estropada for estropada in estropadak_['docs'] if not estropada['izena'].startswith('Play')]
     if sailkapena:
         points_max = len(sailkapena['stats'])
         for taldea, stats in sailkapena['stats'].items():
@@ -75,7 +75,7 @@ def get_points_per_race(league: str, year: int, category: str):
                     "label": val[1]['izena'],
                     "x": i,
                     "value": val[0]}
-                    for i, val in enumerate(zip(points, estropadak))]
+                    for i, val in enumerate(zip(points, estropadak_))]
             else:
                 points_max = stats['points'] + stats.get('discard', 0)
                 points = []
@@ -88,7 +88,7 @@ def get_points_per_race(league: str, year: int, category: str):
                 values = [{
                     "label": val[1]['izena'],
                     "x": i,
-                    "value": val[0]} for i, val in enumerate(zip(points, estropadak))
+                    "value": val[0]} for i, val in enumerate(zip(points, estropadak_))
                 ]
 
             team_values["values"] = values
