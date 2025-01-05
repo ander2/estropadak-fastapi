@@ -1,4 +1,3 @@
-import json
 import logging
 
 from ibm_cloud_sdk_core import ApiException

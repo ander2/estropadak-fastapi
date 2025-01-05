@@ -1,8 +1,8 @@
 import logging
 from typing import Any, Annotated
 
-from app.config import config, PAGE_SIZE, JWT_SECRET_KEY
-from fastapi import APIRouter, HTTPException, Security, Response, status, Query
+from app.config import JWT_SECRET_KEY
+from fastapi import APIRouter, HTTPException, Security, status, Query
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
 from app.models.estropadak import EstropadaTypeEnum
 from app.models.sailkapenak import Sailkapena, SailkapenakList
