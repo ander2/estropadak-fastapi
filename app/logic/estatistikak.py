@@ -1,6 +1,6 @@
 import logging
 
-from app.dao.estatistikak import EstatistikakDAO
+from app.dao import estatistikak
 from app.dao.estropadak import EstropadakDAO
 from app.common.utils import get_team_color
 
@@ -8,7 +8,7 @@ from app.common.utils import get_team_color
 def get_culumative_stats(league, year, team, category):
         result = []
         if year is None:
-            sailkapenak = EstatistikakDAO.get_sailkapenak_by_league(league)
+            sailkapenak = estatistikak.get_sailkapenak_by_league(league)
             for sailkapena in sailkapenak:
                 urtea = int(sailkapena['_id'][-4:])
                 try:
@@ -25,7 +25,7 @@ def get_culumative_stats(league, year, team, category):
                 except KeyError:
                     pass
         else:
-            sailkapena = EstatistikakDAO.get_sailkapena_by_league_year(league, year, category)
+            sailkapena = estatistikak.get_sailkapena_by_league_year(league, year, category)
             estropadak = EstropadakDAO.get_estropadak_by_league_year(
                 league,
                 year)
@@ -56,7 +56,7 @@ def get_culumative_stats(league, year, team, category):
 
 def get_points_per_race(league: str, year: int, category: str):
     result = []
-    sailkapena = EstatistikakDAO.get_sailkapena_by_league_year(league, year, category)
+    sailkapena = estatistikak.get_sailkapena_by_league_year(league, year, category)
     estropadak = EstropadakDAO.get_estropadak_by_league_year(
         league,
         year)
@@ -101,10 +101,10 @@ def get_points_per_race(league: str, year: int, category: str):
         'docs': result
     }
 
-@staticmethod
+
 def get_points(league: str, team: str):
     result = []
-    sailkapenak = EstatistikakDAO.get_sailkapenak_by_league(league)
+    sailkapenak = estatistikak.get_sailkapenak_by_league(league)
     rank = {
         "key": team,
         "values": [{
@@ -121,11 +121,11 @@ def get_points(league: str, team: str):
         'docs': result
     }
 
-@staticmethod
+
 def get_rank(league: str, year: int, team: str, category: str):
     result = []
     if team is None:
-        sailkapena = EstatistikakDAO.get_sailkapena_by_league_year(league, year, category)
+        sailkapena = estatistikak.get_sailkapena_by_league_year(league, year, category)
         sorted_teams = sorted(
             sailkapena['stats'],
             key=lambda tal: sailkapena['stats'][tal]['position'],
@@ -141,7 +141,7 @@ def get_rank(league: str, year: int, team: str, category: str):
         }
         result.append(rank)
     else:
-        sailkapenak = EstatistikakDAO.get_sailkapenak_by_league(league)
+        sailkapenak = estatistikak.get_sailkapenak_by_league(league)
         rank = {
             "key": team,
             "values": [{
@@ -157,12 +157,12 @@ def get_rank(league: str, year: int, team: str, category: str):
         'docs': result
     }
 
-@staticmethod
+
 def get_ages(league: str, year: int, team: str):
     result = []
     logging.info(f'Got team {league} {year} {team}')
     if team is None:
-        sailkapena = EstatistikakDAO.get_sailkapena_by_league_year(league, year, None)
+        sailkapena = estatistikak.get_sailkapena_by_league_year(league, year, None)
         if not sailkapena or not sailkapena.get('stats', []):
             return result
         logging.info('Got sailkapena')
@@ -194,7 +194,7 @@ def get_ages(league: str, year: int, team: str):
         result.append(med_ages)
         result.append(max_ages)
     else:
-        sailkapenak = EstatistikakDAO.get_sailkapenak_by_league(league)
+        sailkapenak = estatistikak.get_sailkapenak_by_league(league)
         min_ages = {
             "key": 'Min',
             "values": [{
@@ -228,11 +228,11 @@ def get_ages(league: str, year: int, team: str):
         'docs': result
     }
 
-@staticmethod
+
 def get_incorporations(league: str, year: int, team: str):
     result = []
     if team is None:
-        sailkapena = EstatistikakDAO.get_sailkapena_by_league_year(league, year, None)
+        sailkapena = estatistikak.get_sailkapena_by_league_year(league, year, None)
         altak = {
             "key": 'Altak',
             "values": [{
@@ -252,7 +252,7 @@ def get_incorporations(league: str, year: int, team: str):
         result.append(altak)
         result.append(bajak)
     else:
-        sailkapenak = EstatistikakDAO.get_sailkapenak_by_league(league)
+        sailkapenak = estatistikak.get_sailkapenak_by_league(league)
         altak = {
             "key": 'Altak',
             "values": [{
