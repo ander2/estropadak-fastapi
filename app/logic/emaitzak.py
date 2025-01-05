@@ -1,13 +1,12 @@
 from ..dao.models.estropadak import Estropada
 from ..dao.models.sailkapenak import SailkapenaDoc
-from ..dao import emaitzak
-from ..dao.taldeak import TaldeakDAO
+from ..dao import emaitzak, taldeak
 
 
 class EmaitzakLogic:
     @staticmethod
     def create_emaitza(emaitza: dict):
-        talde_izen_normalizatua = TaldeakDAO.get_talde_izen_normalizatua(emaitza['talde_izena'])
+        talde_izen_normalizatua = taldeak.get_talde_izen_normalizatua(emaitza['talde_izena'])
         izena = talde_izen_normalizatua.replace(' ', '-')
         emaitza['_id'] = f'{emaitza['estropada_data'].strftime("%Y-%m-%d")}_{emaitza["liga"].value}_{izena}'
         del emaitza['id']
@@ -26,7 +25,7 @@ class EmaitzakLogic:
     @staticmethod
     def create_emaitzak_from_estropada(estropada: Estropada):
         for emaitza in estropada.sailkapena:
-            talde_izen_normalizatua = TaldeakDAO.get_talde_izen_normalizatua(emaitza.talde_izena)
+            talde_izen_normalizatua = taldeak.get_talde_izen_normalizatua(emaitza.talde_izena)
             izena = talde_izen_normalizatua.replace(' ', '-')
             id = f'{estropada.data.strftime("%Y-%m-%d")}_{estropada.liga}_{izena}'
             emaitza_ = SailkapenaDoc(

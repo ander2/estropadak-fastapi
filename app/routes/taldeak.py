@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter, HTTPException, status
 
 from app.models.estropadak import EstropadaTypeEnum
-from app.dao.taldeak import TaldeakDAO
+from app.dao import taldeak
 from app.dao import plantilak
 
 logger = logging.getLogger('estropadak')
@@ -20,7 +20,7 @@ def get_taldeak(league: EstropadaTypeEnum, year: int | None = None, category: st
     teams = []
     if league.upper() not in (EstropadaTypeEnum.GBL, EstropadaTypeEnum.GTL, EstropadaTypeEnum.BBL, EstropadaTypeEnum.BTL):
         category = None
-    teams = TaldeakDAO.get_taldeak(league, year, category)
+    teams = taldeak.get_taldeak(league, year, category)
     return teams
 
 

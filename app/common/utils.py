@@ -2,7 +2,7 @@ import datetime
 import textdistance
 
 # from estropadakparser.estropada.estropada import Estropada
-from app.dao.taldeak import TaldeakDAO
+from app.dao import taldeak
 
 
 def normalize_id(row):
@@ -70,10 +70,10 @@ def get_team_color(team: str):
             return 'blue'
 
 
-def create_id(estropada, emaitza, taldeak):
+def create_id(estropada, emaitza):
     data = datetime.datetime.strptime(estropada['data'], '%Y-%m-%d %H:%M')
     if emaitza is not None:
-        taldea = TaldeakDAO.get_talde_izena(emaitza["talde_izena"])
+        taldea = taldeak.get_talde_izena(emaitza["talde_izena"])
         id = f'{data.strftime("%Y-%m-%d")}_{estropada["liga"]}_{taldea}'
     else:
         izena = estropada['izena'].replace(' ', '-')
