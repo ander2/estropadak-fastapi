@@ -1,10 +1,10 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, Security, Response, status, Query
+from fastapi import APIRouter, HTTPException, status
 
 from app.models.estropadak import EstropadaTypeEnum
 from app.dao.taldeak import TaldeakDAO
-from app.dao.plantilak import PlantilakDAO
+from app.dao import plantilak
 
 logger = logging.getLogger('estropadak')
 MIN_YEAR = 2003
@@ -30,7 +30,7 @@ def get_taldea(self, team_id: str, year: int, league: EstropadaTypeEnum):
     league = league.upper()
     if league not in leagues:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, 'Not valid league')
-    team = PlantilakDAO.get_plantila(team_id, league, year)
+    team = plantilak.get_plantila(team_id, league, year)
     if team is None:
         return {'message': 'Team not found'}, 404
     return team
