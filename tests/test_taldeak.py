@@ -6,7 +6,7 @@ from app.main import api
 client = TestClient(api)
 
 
-def testTaldeak():
+def test_taldeak():
     rv = client.get('/taldeak?league=ACT&year=2019')
     assert rv.status_code == 200
     taldeak = rv.json()

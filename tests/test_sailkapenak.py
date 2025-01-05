@@ -9,6 +9,21 @@ from app.main import api as app
 client = TestClient(app)
 
 
+@pytest.fixture()
+def clean_up(credentials):
+    yield
+    rv = client.post('/auth', json=credentials)
+    doc_ids = (
+        "rank_ACT_2122",
+    )
+    token = rv.json()['access_token']
+    for doc_id in doc_ids:
+        try:
+            client.delete(f'/sailkapenak/{doc_id}', headers=[('Authorization', f'Bearer {token}')])
+        except Exception:
+            pass
+
+
 def test_sailkapena_with_lowercase_league():
     rv = client.get('/sailkapenak?league=act&year=2017')
     assert rv.status_code == 400
@@ -61,12 +76,12 @@ def test_sailkapena_creation_without_credentials():
     assert rv.status_code == 401
 
 
-def test_sailkapena_creation_with_credentials(credentials):
+def test_sailkapena_creation_with_credentials(credentials, clean_up):
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
     rv = client.post('/sailkapenak', json={
         "league": "ACT",
-        "year": 2022,
+        "year": 2122,
         "stats": []
     }, headers=[('Authorization', f'Bearer {token}')])
     assert rv.status_code == 201

@@ -1,5 +1,9 @@
-from .db_connection import get_db_connection
 import logging
+
+from ibm_cloud_sdk_core import ApiException
+
+from .db_connection import get_db_connection
+from app.config import config
 
 
 logger = logging.getLogger('estropadak')
@@ -13,15 +17,16 @@ def get_sailkapena_by_league_year(league, year, category):
         else:
             key = 'rank_{}_{}'.format(league.upper(), year)
         try:
-            doc = database[key]
-        except KeyError:
+            res = database.get_document(config["DBNAME"], key)
+            doc = res.get_result()
+        except ApiException:
             return None
         result = {
             'total': 1,
             'docs': [doc]
         }
         return result
-        
+
 
 def get_sailkapena_by_league(league):
     league = league.upper()
@@ -33,19 +38,27 @@ def get_sailkapena_by_league(league):
     with get_db_connection() as database:
         try:
             result = []
-            ranks = database.get_view_result("estropadak", "rank",
-                                                raw_result=True,
-                                                startkey=start,
-                                                endkey=end,
-                                                reduce=True)
+            res = database.post_view(
+                config["DBNAME"],
+                "estropadak",
+                "rank",
+                start_key=start,
+                end_key=end,
+                reduce=True,
+            )
+            ranks = res.get_result()
             count = ranks.get('rows', [{'value': 0}])[0]['value']
             if count > 0:
-                ranks = database.get_view_result("estropadak", "rank",
-                                                    raw_result=True,
-                                                    startkey=start,
-                                                    endkey=end,
-                                                    include_docs=True,
-                                                    reduce=False)
+                res = database.post_view(
+                    config["DBNAME"],
+                    "estropadak",
+                    "rank",
+                    start_key=start,
+                    end_key=end,
+                    include_docs=True,
+                    reduce=False,
+                )
+                ranks = res.get_result()
                 for rank in ranks['rows']:
                     result.append(rank['doc'])
         except KeyError:
@@ -59,7 +72,9 @@ def get_sailkapena_by_league(league):
 def get_sailkapena_by_id(id: str):
     with get_db_connection() as database:
         try:
-            return database[id]
+            res = database.get_document(config["DBNAME"], id)
+            doc = res.get_result()
+            return doc
         except KeyError:
             return None  # {'error': 'Sailkapena not found'}, 404
 
@@ -71,18 +86,25 @@ def get_sailkapenak_by_teams(league: str, year: str, teams: list[str]):
             result = []
             for team in teams:
                 key = [team, league, year]
-                sailkapenak_count = database.get_view_result("sailkapenak", "by_team",
-                                                                key=key,
-                                                                include_docs=False,
-                                                                raw_result=True,
-                                                                reduce=True)
+                res = database.post_view(
+                    config["DBNAME"],
+                    "sailkapenak",
+                    "by_team",
+                    key=key,
+                    include_docs=False,
+                    reduce=True,
+                )
+                sailkapenak_count = res.get_result()
                 if len(sailkapenak_count['rows']) > 0:
                     doc_count = doc_count + sailkapenak_count.get('rows', [{'value': 0}])[0]['value']
-                    sailkapenak = database.get_view_result("sailkapenak", "by_team",
-                                                            key=key,
-                                                            include_docs=False,
-                                                            raw_result=True,
-                                                            reduce=False)
+                    sailkapenak = database.post_view(
+                        config["DBNAME"],
+                        "sailkapenak",
+                        "by_team",
+                        key=key,
+                        include_docs=False,
+                        reduce=False,
+                    )
                     for emaitza in sailkapenak['rows']:
                         doc = database[emaitza['id']]
                         for name, stat in doc['stats'].items():
@@ -93,7 +115,7 @@ def get_sailkapenak_by_teams(league: str, year: str, teams: list[str]):
                                 }]
                                 break
                         result.append(doc)
-            print(result)
+            logger.debug(result)
             return {
                 'total': doc_count,
                 'docs': result
@@ -104,21 +126,25 @@ def get_sailkapenak_by_teams(league: str, year: str, teams: list[str]):
 
 def insert_sailkapena_into_db(sailkapena):
     with get_db_connection() as database:
-        doc = database.create_document(sailkapena)
+        res = database.post_document(config["DBNAME"], sailkapena)
+        doc = res.get_result()
         return doc
 
 
 def update_sailkapena_into_db(sailkapena_id, sailkapena):
     with get_db_connection() as database:
-        doc = database[sailkapena_id]
-        doc['stats'] = sailkapena['stats']
-        doc.save()
+        res = database.get_document(config["DBNAME"], sailkapena_id)
+        doc = res.get_result()
+        doc["stats"] = sailkapena["stats"]
+        database.put_document(config["DBNAME"], sailkapena_id, doc, rev=doc["_rev"])
         return doc
 
 
 def delete_sailkapena_from_db(sailkapena_id):
     with get_db_connection() as database:
-        doc = database[sailkapena_id]
-        if doc.exists():
-            doc.fetch()
-            doc.delete()
+        try:
+            res = database.get_document(config["DBNAME"], sailkapena_id)
+            doc = res.get_result()
+            database.delete_document(config["DBNAME"], sailkapena_id, rev=doc["_rev"])
+        except ApiException:
+            logger.info(f"Sailkapenak document with id {sailkapena_id} not found")

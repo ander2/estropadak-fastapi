@@ -1,6 +1,11 @@
 import logging
-from .db_connection import get_db_connection
 
+from ibm_cloud_sdk_core import ApiException
+
+from .db_connection import get_db_connection
+from app.config import config
+
+logger = logging.getLogger('estropadak')
 
 class EstatistikakDAO:
     @staticmethod
@@ -13,11 +18,12 @@ class EstatistikakDAO:
         with get_db_connection() as database:
             try:
                 logging.info(f'Getting {key}')
-                doc = database[key]
-            except KeyError:
+                res = database.get_document(config["DBNAME"], key)
+                doc = res.get_result()
+            except ApiException:
+                logger.info(f'Sailkapena document not found for id {key}')
                 return None
-            result = doc
-            return result
+            return doc
 
     @staticmethod
     def get_sailkapenak_by_league(league):
@@ -31,16 +37,20 @@ class EstatistikakDAO:
         end = endkey
         with get_db_connection() as database:
             try:
-                ranks = database.get_view_result("estropadak", "rank",
-                                                 raw_result=True,
-                                                 startkey=start,
-                                                 endkey=end,
-                                                 include_docs=True,
-                                                 reduce=False)
+                res = database.post_view(
+                    config["DBNAME"],
+                    "estropadak",
+                    "rank",
+                    start_key=start,
+                    end_key=end,
+                    include_docs=True,
+                    reduce=False,
+                )
                 result = []
+                ranks = res.get_result()
                 for rank in ranks['rows']:
                     result.append(rank['doc'])
                 return result
-            except KeyError:
+            except ApiException:
+                logger.info(f'Sailkapena document not found for id {key}')
                 return {'error': 'Estropadak not found'}, 404
-            return result

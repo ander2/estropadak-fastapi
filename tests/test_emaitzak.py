@@ -3,6 +3,7 @@ import json
 
 from fastapi.testclient import TestClient
 
+from app.config import config
 from app.dao.db_connection import get_db_connection
 from app.main import api as app
 
@@ -14,16 +15,16 @@ def clean_up():
     docs = [
         '2019-06-18_ARC1_San-Juan',
         '2019-06-18_ARC1_Donostiarra',
+        '2019-06-18_ARC1_Ondarroa'
     ]
     with get_db_connection() as database:
         for doc_id in docs:
             try:
-                doc = database[doc_id]
-                if doc.exists():
-                    # with Document(db, doc_id) as doc:
-                    doc.fetch()
-                    doc.delete()
-            except KeyError:
+                res = database.get_document(config["DBNAME"], doc_id)
+                if res.status_code == 200:
+                    doc = res.get_result()
+                    database.delete_document(config["DBNAME"], doc_id, rev=doc["_rev"])
+            except Exception:
                 pass
 
 
@@ -149,7 +150,7 @@ def testEmaitzakCreationWithCredentials(credentials, clean_up):
     assert rv.status_code == 200
 
 
-def testEmaitzakCreationWithInvalidData(credentials, clean_up):
+def testEmaitzakCreationWithInvalidData(credentials):
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
     emaitza_data = {
@@ -198,7 +199,7 @@ def testEmaitzakModificationWithoutCredentials(credentials, clean_up):
         "liga": "ARC1",
         "estropada_id": "37a4adac975ce9ab29decb228900718b",
         "type": "emaitza",
-        "talde_izen_normalizatua": "San Juan"
+        "talde_izen_normalizatua": "Donostiarra"
     }
     rv = client.post(
         '/emaitzak',
@@ -288,6 +289,16 @@ def testEmaitzakDeletion(credentials, clean_up):
     assert rv.status_code == 201
 
     id = "2019-06-18_ARC1_Ondarroa"
+    rv = client.delete(
+        f'/emaitzak/{id}',
+        headers=[('Authorization', f'Bearer {token}')])
+    assert rv.status_code == 204
+
+
+def test_non_existant_emaitza_deletion(credentials):
+    rv = client.post('/auth', json=credentials)
+    token = rv.json()['access_token']
+    id = "2019-06-18_ARC1_Ondarroaxxxxxx"
     rv = client.delete(
         f'/emaitzak/{id}',
         headers=[('Authorization', f'Bearer {token}')])

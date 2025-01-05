@@ -43,7 +43,9 @@ async def post_estropada(
     try:
         estropada_ = EstropadakLogic.create_estropada(data)
         if estropada_:
-            return estropada_  # .dump_dict()
+            result = estropada_.dump_dict()
+            result['id'] = result['_id']
+            return result
         else:
             raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE)
     except Exception as e:

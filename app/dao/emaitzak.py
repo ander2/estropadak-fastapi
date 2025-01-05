@@ -1,5 +1,8 @@
 import logging
 
+from ibm_cloud_sdk_core import ApiException
+
+from app.config import config
 from ..dao.db_connection import get_db_connection
 from ..dao.models.sailkapenak import SailkapenaDoc
 
@@ -11,7 +14,8 @@ class EmaitzakDAO:
     def get_emaitza_by_id(id):
         with get_db_connection() as database:
             try:
-                emaitza = database[id]
+                res = database.get_document(config["DBNAME"], id)
+                emaitza = res.get_result()
             except KeyError:
                 emaitza = None
             return emaitza
@@ -71,12 +75,11 @@ class EmaitzakDAO:
             if criteria['liga'] == 'EUSKOTREN':
                 criteria['liga'] = criteria['liga'].lower()
         with get_db_connection() as database:
-            emaitzak = database.get_query_result(criteria)
+            res = database.post_find(config["DBNAME"], criteria)
+            emaitzak = res.get_result()
             try:
-                for emaitza in emaitzak:
-                    total = total + 1
-                # emaitzak = database.get_query_result(criteria)
-                docs = emaitzak[start:end]
+                total = len(emaitzak['docs'])
+                docs = emaitzak['docs'][start:end]
             except IndexError:
                 return {'error': 'Bad pagination'}, 400
             return (docs, total,)
@@ -86,27 +89,33 @@ class EmaitzakDAO:
         emaitza_ = emaitza.dump_dict()
         logger.debug(emaitza_)
         with get_db_connection() as database:
-            document = database.create_document(emaitza_)
-            return document.exists()
+            res = database.post_document(config["DBNAME"], emaitza_)
+            document = res.get_result()
+            return document is not None
 
     @staticmethod
     def update_emaitza_into_db(emaitza_id, emaitza):
         emaitza_ = emaitza.dump_dict()
         with get_db_connection() as database:
-            document = database[emaitza_id]
-            if document.exists():
+            res = database.get_document(config["DBNAME"], emaitza_id)
+            document = res.get_result()
+            if document:
                 document.update(emaitza_)
-                document.save()
-                return document.exists()
+                database.put_document(config["DBNAME"], emaitza_id, document, rev=document["_rev"])
+                return True
             else:
                 return None
 
     @staticmethod
     def delete_emaitza_from_db(emaitza_id):
         with get_db_connection() as database:
-            document = database[emaitza_id]
-            if document.exists():
-                document.fetch()
-                document.delete()
+            try:
+                res = database.get_document(config["DBNAME"], emaitza_id)
+                document = res.get_result()
+                if document:
+                    database.delete_document(config["DBNAME"], emaitza_id, rev=document["_rev"])
+                    return True
+            except ApiException:
+                logger.error(f'Emaitza document with id {emaitza_id} not found on deletion')
                 return True
         return False

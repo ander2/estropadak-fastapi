@@ -1,7 +1,12 @@
 import textdistance
 import logging
 
+from ibm_cloud_sdk_core import ApiException
+
+from app.config import config
 from .db_connection import get_db_connection
+
+logger = logging.getLogger('estropadak')
 
 
 class TaldeakDAO:
@@ -10,12 +15,10 @@ class TaldeakDAO:
     def get_taldea_by_id(id):
         with get_db_connection() as database:
             try:
-                taldea = database[id]
-            except TypeError:
-                logging.info("Not found", exc_info=1)
-                taldea = None
-            except KeyError:
-                logging.info("Not found", exc_info=1)
+                res = database.get_document(config["DBNAME"], id)
+                taldea = res.get_result()
+            except ApiException as e:
+                logger.error(f"Taldea document with id {id} not found: {e}")
                 taldea = None
             return taldea
 
@@ -26,12 +29,14 @@ class TaldeakDAO:
         taldeak = []
         with get_db_connection() as database:
             try:
-                all_teams = database['talde_izenak2']
+                res = database.get_document(config["DBNAME"], 'talde_izenak2')
+                all_teams = res.get_result()
                 if year is not None:
                     key = f'rank_{league}_{year}'
                     if category:
                         key = f'rank_{league}_{year}_{category.lower()}'
-                    resume = database[key]
+                    res = database.get_document(config["DBNAME"], key)
+                    resume= res.get_result()
                     for taldea in resume['stats'].keys():
                         try:
                             short = all_teams[taldea.title()].get('acronym')
@@ -50,21 +55,23 @@ class TaldeakDAO:
                         })
                 else:
                     league = league.lower()
-                    resume = database[f'taldeak_{league}']
+                    res = database.get_document(config["DBNAME"], f'taldeak_{league}')
+                    resume =  res.get_result()
                     for taldea in resume['taldeak']:
                         taldeak.append({
                             "name": taldea,
                             "alt_names": all_teams[taldea].get('alt_names'),
                             "short": all_teams[taldea].get('acronym')
                         })
-            except KeyError:
-                logging.info("Not found", exc_info=1)
+            except ApiException as e:
+                logger.error(f"Taldeak document for league {league}, year {year} and category {category} not found: {e}")
             return taldeak
 
     @staticmethod
     def get_talde_izen_normalizatua(taldea):
         with get_db_connection() as database:
-            talde_izenak = database['talde_izenak']
+            res = database.get_document(config["DBNAME"], 'talde_izenak')
+            talde_izenak = res.get_result()
             try:
                 talde_izena = talde_izenak[taldea]
             except KeyError:
@@ -74,9 +81,10 @@ class TaldeakDAO:
     @staticmethod
     def get_talde_izena(taldea):
         talde_izena = ''
-        talde_izenak = {} 
+        talde_izenak = {}
         with get_db_connection() as database:
-            talde_izenak2 = database['talde_izenak2']
+            res = database.get_document('talde_izenak2')
+            talde_izenak2 = res.get_result()
             for k, v in talde_izenak2.items():
                 if k.startswith('_'):
                     continue
@@ -85,7 +93,7 @@ class TaldeakDAO:
 
             try:
                 talde_izena = talde_izenak[taldea]
-            except KeyError as e:
-                print(e)
+            except ApiException as e:
+                logger.error(f"Cannot find talde_izenak2 document: {e}")
                 talde_izena = talde_izenak[taldea.title()]
         return talde_izena

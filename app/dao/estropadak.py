@@ -1,10 +1,12 @@
 import json
 import logging
 
+from ibm_cloud_sdk_core import ApiException
+
 from .models.estropadak import Estropada
 from .models.sailkapenak import Sailkapena
 from .db_connection import get_db_connection
-from app.config import PAGE_SIZE
+from app.config import PAGE_SIZE, config
 from typing import Dict, List
 
 logger = logging.getLogger('estropadak')
@@ -16,15 +18,16 @@ class EstropadakDAO:
     def get_estropada_by_id(id):
         with get_db_connection() as database:
             try:
-                estropada = database[id]
+                res = database.get_document(config["DBNAME"], id)
+                estropada = res.get_result()
                 estropada['data'] = estropada['data'].replace(' ', 'T')
                 if estropada['liga'] == 'euskotren':
                     estropada['liga'] = estropada['liga'].upper()
             except TypeError:
                 logging.error("Not found", exc_info=1)
                 estropada = None
-            except KeyError:
-                logging.error("Not found", exc_info=1)
+            except ApiException:
+                logging.info(f"Estropada document with id {id} not found")
                 estropada = None
             return estropada
 
@@ -51,29 +54,36 @@ class EstropadakDAO:
 
         with get_db_connection() as database:
             try:
-                res = database.get_view_result("estropadak", "all",
-                                               startkey=start,
-                                               endkey=end,
-                                               raw_result=True,
-                                               reduce=True)
-                rows = res.get('rows', [{'value': 0}])
+                logger.debug(f"Querying DB {start}-{end}")
+                response = database.post_view(
+                    config["DBNAME"],
+                    "estropadak",
+                    "all",
+                    start_key=start,
+                    end_key=end,
+                    reduce=True,
+                )
+                res = response.get_result()
+                rows = res['rows']
+                logger.debug(rows)
+                result = []
                 if len(rows) > 0:
                     doc_count = rows[0]['value']
                 else:
                     doc_count = 0
-                    result = []
                 if doc_count > 0:
-                    estropadak = database.get_view_result("estropadak",
-                                                          "all",
-                                                          raw_result=True,
-                                                          startkey=start,
-                                                          endkey=end,
-                                                          include_docs=True,
-                                                          reduce=False,
-                                                          skip=count * page,
-                                                          limit=count)
-                    result = []
-                    for row in estropadak['rows']:
+                    estropadak = database.post_view(
+                        config["DBNAME"],
+                        "estropadak",
+                        "all",
+                        start_key=start,
+                        end_key=end,
+                        include_docs=True,
+                        reduce=False,
+                        skip=count * page,
+                        limit=count)
+                    res = estropadak.get_result()
+                    for row in res['rows']:
                         estropada = row['doc']
                         estropada['id'] = row['doc']['_id']
                         estropada['data'] = estropada['data'].replace(' ', 'T')
@@ -81,7 +91,6 @@ class EstropadakDAO:
                             estropada['liga'] = estropada['liga'].upper()
                         result.append(estropada)
 
-                print(f"Doc count {len(result)}")
                 return {
                     'total': doc_count,
                     'docs': result
@@ -96,33 +105,33 @@ class EstropadakDAO:
         result = []
         with get_db_connection() as database:
             try:
-
-                _count = database.get_view_result(
+                _count = database.post_view(
+                    config["DBNAME"],
                     "estropadak",
                     "by_year",
-                    raw_result=True,
-                    startkey=start,
-                    endkey=end,
+                    start_key=start,
+                    end_key=end,
                     reduce=True)
-                logging.info(f"Total:{_count}")
-                rows = _count.get('rows', [{'value': 0}])
+                res = _count.get_result()
+                rows = res.get('rows', [{'value': 0}])
                 if len(rows) > 0:
                     doc_count = rows[0]['value']
                 else:
                     doc_count = 0
                     result = []
                 if doc_count > 0:
-                    estropadak = database.get_view_result(
+                    estropadak = database.post_view(
+                        config["DBNAME"],
                         "estropadak",
                         "by_year",
-                        raw_result=True,
-                        startkey=start,
-                        endkey=end,
+                        start_key=start,
+                        end_key=end,
                         include_docs=True,
                         reduce=False,
                         skip=count*page,
                         limit=count)
-                    for row in estropadak['rows']:
+                    res = estropadak.get_result()
+                    for row in res['rows']:
                         logger.debug(row)
                         estropada = row['doc']
                         estropada['data'] = estropada['data'].replace(' ', 'T')
@@ -161,8 +170,10 @@ class EstropadakDAO:
         if estropada.liga == 'EUSKOTREN':
             estropada.liga = estropada.liga.lower()
         with get_db_connection() as database:
-            document = database.create_document(estropada.dump_dict())
-            new_estropada = json.loads(document.json())
+            res = database.post_document(config["DBNAME"], estropada.dump_dict())
+            new_estropada_result = res.get_result()
+            res = database.get_document(config["DBNAME"], new_estropada_result["id"])
+            new_estropada = res.get_result()
             sailkapenak = [Sailkapena(**sailkapena) for sailkapena in new_estropada['sailkapena']]
             new_estropada['sailkapena'] = sailkapenak
             return Estropada(**new_estropada)
@@ -170,7 +181,8 @@ class EstropadakDAO:
     @staticmethod
     def update_estropada_into_db(estropada_id: str, estropada: Estropada):
         with get_db_connection() as database:
-            doc = database[estropada_id]
+            res = database.get_document(config['DBNAME'], estropada_id)
+            doc = res.get_result()
             doc['izena'] = estropada.izena
             doc['data'] = estropada.data.isoformat()
             doc['liga'] = estropada.liga
@@ -189,12 +201,12 @@ class EstropadakDAO:
                 doc['kategoriak'] = estropada.kategoriak
             if hasattr(estropada, 'urla'):
                 doc['urla'] = estropada.urla
-            doc.save()
+            database.put_document(config["DBNAME"], estropada_id, doc)
 
     @staticmethod
     def delete_estropada_from_db(estropada_id):
         with get_db_connection() as database:
-            doc = database[estropada_id]
-            if doc.exists():
-                doc.fetch()
-                doc.delete()
+            res = database.get_document(config["DBNAME"], estropada_id)
+            document = res.get_result()
+            if document:
+                database.delete_document(config["DBNAME"], estropada_id, rev=document["_rev"])
