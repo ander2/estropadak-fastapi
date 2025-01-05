@@ -7,7 +7,7 @@ from app.config import PAGE_SIZE, JWT_SECRET_KEY
 from fastapi import APIRouter, HTTPException, Security, status
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
 
-from ..dao.emaitzak import EmaitzakDAO
+from ..dao import emaitzak
 from ..logic.emaitzak import EmaitzakLogic
 from ..models.emaitzak import Emaitza
 
@@ -26,7 +26,7 @@ def get_emaitzak(criteria: str = '', page: int = 0, count: int = PAGE_SIZE):
     except JSONDecodeError:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Bad criteria, please check the query")
     try:
-        docs, total = EmaitzakDAO.get_emaitzak(criteria, page, count)
+        docs, total = emaitzak.get_emaitzak(criteria, page, count)
         return {"docs": docs, "total": total}
     except Exception:
         logging.info("Error", exc_info=1)
@@ -58,7 +58,7 @@ def put_emaitza(
 @router.get("/{emaitza_id}")
 def get_emaitza(emaitza_id: str) -> Any:
 
-    emaitza = EmaitzakDAO.get_emaitza_by_id(emaitza_id)
+    emaitza = emaitzak.get_emaitza_by_id(emaitza_id)
     if emaitza:
         return emaitza
     else:
@@ -66,6 +66,6 @@ def get_emaitza(emaitza_id: str) -> Any:
 
 @router.delete("/{emaitza_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(emaitza_id: str):
-    emaitza = EmaitzakDAO.delete_emaitza_from_db(emaitza_id)
+    emaitza = emaitzak.delete_emaitza_from_db(emaitza_id)
     if not emaitza:
         return {"msg": "Cannot delete document"}, 401

@@ -1,6 +1,6 @@
 from ..dao.models.estropadak import Estropada
 from ..dao.models.sailkapenak import SailkapenaDoc
-from ..dao.emaitzak import EmaitzakDAO
+from ..dao import emaitzak
 from ..dao.taldeak import TaldeakDAO
 
 
@@ -12,7 +12,7 @@ class EmaitzakLogic:
         emaitza['_id'] = f'{emaitza['estropada_data'].strftime("%Y-%m-%d")}_{emaitza["liga"].value}_{izena}'
         del emaitza['id']
         emaitza_ = SailkapenaDoc(**emaitza)
-        doc_created = EmaitzakDAO.insert_emaitza_into_db(emaitza_)
+        doc_created = emaitzak.insert_emaitza_into_db(emaitza_)
         return doc_created
 
     @staticmethod
@@ -20,7 +20,7 @@ class EmaitzakLogic:
         del emaitza['id']
         emaitza['_id'] = emaitza_id
         emaitza_ = SailkapenaDoc(**emaitza)
-        doc_updated = EmaitzakDAO.update_emaitza_into_db(emaitza_id, emaitza_)
+        doc_updated = emaitzak.update_emaitza_into_db(emaitza_id, emaitza_)
         return doc_updated
 
     @staticmethod
@@ -39,5 +39,5 @@ class EmaitzakLogic:
                 type="emaitza",
                 **emaitza.dump_dict(),
             )
-            EmaitzakDAO.insert_emaitza_into_db(emaitza_)
+            emaitzak.insert_emaitza_into_db(emaitza_)
         return True
