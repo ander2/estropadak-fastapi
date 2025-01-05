@@ -1,50 +1,47 @@
 import logging
 
-from app.dao import estatistikak
-from app.dao.estropadak import EstropadakDAO
+from app.dao import estatistikak, estropadak
 from app.common.utils import get_team_color
 
 
 def get_culumative_stats(league, year, team, category):
-        result = []
-        if year is None:
-            sailkapenak = estatistikak.get_sailkapenak_by_league(league)
-            for sailkapena in sailkapenak:
-                urtea = int(sailkapena['_id'][-4:])
-                try:
-                    year_values = {
-                        "key": team
-                    }
-                    values = [{
-                        "label": urtea,
-                        "x": i,
-                        "value": val}
-                        for i, val in enumerate(sailkapena['stats'][team]['cumulative'])]
-                    year_values["values"] = values
-                    result.append(year_values)
-                except KeyError:
-                    pass
-        else:
-            sailkapena = estatistikak.get_sailkapena_by_league_year(league, year, category)
-            estropadak = EstropadakDAO.get_estropadak_by_league_year(
-                league,
-                year)
-            estropadak = [
-                estropada for estropada in estropadak['docs']
-                if not estropada['izena'].startswith('Play')
-                and estropada.get('puntuagarria', True)
-            ]
-            for taldea, stats in sailkapena['stats'].items():
-                team_values = {
-                    "key": taldea,
-                    "color": get_team_color(taldea),
+    result = []
+    if year is None:
+        sailkapenak = estatistikak.get_sailkapenak_by_league(league)
+        for sailkapena in sailkapenak:
+            urtea = int(sailkapena['_id'][-4:])
+            try:
+                year_values = {
+                    "key": team
                 }
-                values = [{"label": val[1]['izena'],
-                           "x": i,
-                           "value": val[0]}
-                          for i, val in enumerate(zip(stats['cumulative'], estropadak))]
-                team_values["values"] = values
-                result.append(team_values)
+                values = [{
+                    "label": urtea,
+                    "x": i,
+                    "value": val}
+                    for i, val in enumerate(sailkapena['stats'][team]['cumulative'])]
+                year_values["values"] = values
+                result.append(year_values)
+            except KeyError:
+                pass
+    else:
+        sailkapena = estatistikak.get_sailkapena_by_league_year(league, year, category)
+        estropadak_ = estropadak.get_estropadak_by_league_year(league, year)
+        estropadak_ = [
+            estropada for estropada in estropadak_['docs']
+            if not estropada['izena'].startswith('Play')
+            and estropada.get('puntuagarria', True)
+        ]
+        for taldea, stats in sailkapena['stats'].items():
+            team_values = {
+                "key": taldea,
+                "color": get_team_color(taldea),
+            }
+            values = [{"label": val[1]['izena'],
+                        "x": i,
+                        "value": val[0]}
+                        for i, val in enumerate(zip(stats['cumulative'], estropadak_))]
+            team_values["values"] = values
+            result.append(team_values)
         try:
             result = sorted(result, key=lambda x: x['values'][-1]['value'])
         except IndexError:
@@ -57,7 +54,7 @@ def get_culumative_stats(league, year, team, category):
 def get_points_per_race(league: str, year: int, category: str):
     result = []
     sailkapena = estatistikak.get_sailkapena_by_league_year(league, year, category)
-    estropadak = EstropadakDAO.get_estropadak_by_league_year(
+    estropadak = estropadak.get_estropadak_by_league_year(
         league,
         year)
     estropadak = [estropada for estropada in estropadak['docs'] if not estropada['izena'].startswith('Play')]

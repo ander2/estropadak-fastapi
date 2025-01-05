@@ -2,7 +2,7 @@ import datetime
 import logging
 
 from ..models.estropadak import Estropada
-from ..dao.estropadak import EstropadakDAO
+from ..dao import estropadak
 from ..dao.models.estropadak import Estropada as EstropadaModel
 from ..dao.models.sailkapenak import Sailkapena
 from ..logic.emaitzak import EmaitzakLogic
@@ -37,7 +37,7 @@ class EstropadakLogic():
         if estropada_.sailkapena:
             EmaitzakLogic.create_emaitzak_from_estropada(estropada_)
 
-        new_estropada = EstropadakDAO.insert_estropada_into_db(estropada_)
+        new_estropada = estropadak.insert_estropada_into_db(estropada_)
         return new_estropada
 
     @staticmethod
@@ -49,14 +49,14 @@ class EstropadakLogic():
         #     # todo implement EmaitzaLogic.create_emaitza
         #     pass
         estropada_ = EstropadaModel(_id=estropada_id, type=type, **estropada.model_dump(exclude_unset=True))
-        return EstropadakDAO.update_estropada_into_db(estropada_id, estropada_)
+        return estropadak.update_estropada_into_db(estropada_id, estropada_)
 
     @staticmethod
     def get_estropada(estropada_id):
-        estropada = EstropadakDAO.get_estropada_by_id(estropada_id)
+        estropada = estropadak.get_estropada_by_id(estropada_id)
         if estropada and estropada.get('bi_jardunaldiko_bandera'):
             estropada['bi_eguneko_sailkapena'] = []
-            estropada_bi = EstropadakDAO.get_estropada_by_id(estropada['related_estropada'])
+            estropada_bi = estropadak.get_estropada_by_id(estropada['related_estropada'])
             if len(estropada.get('sailkapena', [])) > 0 and len(estropada_bi.get('sailkapena', [])) > 0:
                 denborak_bat = {sailk['talde_izena']: sailk['denbora'] for sailk in estropada['sailkapena']}
                 denborak_bi = {sailk['talde_izena']: sailk['denbora'] for sailk in estropada_bi['sailkapena']}
@@ -97,4 +97,4 @@ class EstropadakLogic():
 
     @staticmethod
     def delete_estropada(estropada_id):
-        EstropadakDAO.delete_estropada_from_db(estropada_id)
+        estropadak.delete_estropada_from_db(estropada_id)

@@ -1,12 +1,11 @@
 import logging
-import http.client
 
 from typing import Any
-from app.config import config, PAGE_SIZE, JWT_SECRET_KEY
-from fastapi import APIRouter, HTTPException, Security, Response, status
+from app.config import PAGE_SIZE, JWT_SECRET_KEY
+from fastapi import APIRouter, HTTPException, Security, status
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
 
-from ..dao.estropadak import EstropadakDAO
+from ..dao import estropadak
 from ..logic.estropadak import EstropadakLogic
 from ..models.estropadak import Estropada, EstropadakList, EstropadaTypeEnum
 
@@ -30,8 +29,8 @@ async def get_estropadak(year: int | None = None, league: EstropadaTypeEnum | No
         kwargs["count"] = count
     if page is not None:
         kwargs["page"] = page
-    estropadak = EstropadakDAO.get_estropadak(**kwargs)
-    return estropadak
+    estropadak_ = estropadak.get_estropadak(**kwargs)
+    return estropadak_
 
 
 @router.post("", response_model=Estropada, status_code=status.HTTP_201_CREATED)
@@ -55,7 +54,7 @@ async def post_estropada(
 
 @router.get("/{doc_id}", response_model=Estropada)
 async def get_estropada(doc_id: str) -> Any:
-    estropada = EstropadakDAO.get_estropada_by_id(doc_id)
+    estropada = estropadak.get_estropada_by_id(doc_id)
     if not estropada:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return estropada

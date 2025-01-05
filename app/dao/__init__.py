@@ -1,4 +1,5 @@
 __all__ = [
     "emaitzak",
-    "estatistikak"
+    "estatistikak",
+    "estropadak"
 ]
