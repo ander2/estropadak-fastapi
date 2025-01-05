@@ -1,8 +1,7 @@
 import datetime
-import logging
 
 from ..models.estropadak import Estropada
-from ..dao import estropadak
+from ..dao import estropadak, years
 from ..dao.models.estropadak import Estropada as EstropadaModel
 from ..dao.models.sailkapenak import Sailkapena
 from ..logic.emaitzak import EmaitzakLogic
@@ -89,7 +88,7 @@ class EstropadakLogic():
     def _validate_league_year(league: str, year: int) -> bool:
         if not league and not year:
             return True
-        all_years = YearsDAO.get_years_from_db()
+        all_years = years.get_years_from_db()
         if league in all_years:
             return year in all_years[league]
         else:
