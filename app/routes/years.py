@@ -1,9 +1,9 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, Security, Response, status, Query
+from fastapi import APIRouter, Security
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
 
-from app.config import config, PAGE_SIZE, JWT_SECRET_KEY
+from app.config import JWT_SECRET_KEY
 from app.models.estropadak import EstropadaTypeEnum
 from app.models.years import Year, YearPutModel
 from app.dao import years
@@ -38,17 +38,16 @@ def get_all_years(historial: bool = False, year: int = 2010) -> list[Year]:
                 })
     return result
 
+
 @router.get('/{league}')
 def get_years(league: EstropadaTypeEnum):
     all_years = years.get_years_from_db()
-    years = all_years.get(league.lower(), [])
+    years_ = all_years.get(league.lower(), [])
     return {
         'name': league,
-        'years': years
+        'years': years_
     }
 
-# @jwt_required()
-# @api.expect(urteak_put_model, validate=True)
 @router.put('/{league}')
 def put_years(league: EstropadaTypeEnum,
               data: YearPutModel,

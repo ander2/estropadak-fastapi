@@ -18,7 +18,8 @@ router = APIRouter(
 @router.get('')
 def get_taldeak(league: EstropadaTypeEnum, year: int | None = None, category: str | None = None):
     teams = []
-    if league.upper() not in (EstropadaTypeEnum.GBL, EstropadaTypeEnum.GTL, EstropadaTypeEnum.BBL, EstropadaTypeEnum.BTL):
+    categorised_leagues = (EstropadaTypeEnum.GBL, EstropadaTypeEnum.GTL, EstropadaTypeEnum.BBL, EstropadaTypeEnum.BTL)
+    if league.upper() not in categorised_leagues:
         category = None
     teams = taldeak.get_taldeak(league, year, category)
     return teams

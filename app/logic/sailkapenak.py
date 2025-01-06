@@ -4,7 +4,7 @@ from ..dao.sailkapenak import get_sailkapena_by_id, insert_sailkapena_into_db, u
 from ..models.sailkapenak import Sailkapena
 
 logger = logging.getLogger('estropadak')
-    
+
 
 def _encode_sailkapena(sailkapena: Sailkapena) -> dict:
     rank_id = f'rank_{sailkapena.league.upper()}_{sailkapena.year}'
@@ -35,10 +35,10 @@ def _decode_sailkapena(sailkapena: dict) -> Sailkapena:
         })
     return Sailkapena(**result)
 
-    
+
 def create_sailkapena(sailkapena: Sailkapena):
     sailkapena_ = _encode_sailkapena(sailkapena)
-    res = insert_sailkapena_into_db(sailkapena_)
+    insert_sailkapena_into_db(sailkapena_)
     sailk = get_sailkapena(sailkapena_['_id'])
     return sailk
 

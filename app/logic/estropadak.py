@@ -47,7 +47,9 @@ class EstropadakLogic():
         # if estropada.get('sailkapena', []):
         #     # todo implement EmaitzaLogic.create_emaitza
         #     pass
-        estropada_ = EstropadaModel(_id=estropada_id, type=type, **estropada.model_dump(exclude_unset=True))
+        estropada_ = EstropadaModel(_id=estropada_id,
+                                    type=type,
+                                    **estropada.model_dump(exclude_unset=True))
         return estropadak.update_estropada_into_db(estropada_id, estropada_)
 
     @staticmethod
@@ -56,7 +58,8 @@ class EstropadakLogic():
         if estropada and estropada.get('bi_jardunaldiko_bandera'):
             estropada['bi_eguneko_sailkapena'] = []
             estropada_bi = estropadak.get_estropada_by_id(estropada['related_estropada'])
-            if len(estropada.get('sailkapena', [])) > 0 and len(estropada_bi.get('sailkapena', [])) > 0:
+            if (len(estropada.get('sailkapena', [])) > 0 and
+                len(estropada_bi.get('sailkapena', [])) > 0):
                 denborak_bat = {sailk['talde_izena']: sailk['denbora'] for sailk in estropada['sailkapena']}
                 denborak_bi = {sailk['talde_izena']: sailk['denbora'] for sailk in estropada_bi['sailkapena']}
                 for taldea, denbora in denborak_bat.items():
@@ -85,7 +88,7 @@ class EstropadakLogic():
                         item['posizioa'] = ind + 1
         return estropada
 
-    def _validate_league_year(league: str, year: int) -> bool:
+    def _validate_league_year(self, league: str, year: int) -> bool:
         if not league and not year:
             return True
         all_years = years.get_years_from_db()

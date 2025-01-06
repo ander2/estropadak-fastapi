@@ -75,7 +75,7 @@ def test_emaitzak_by_criteria_pagination():
 
 
 @pytest.mark.skip('Test in wrong branch')
-def testEmaitzakByCriteriaBadPagination():
+def test_emaitzak_by_criteria_bad_pagination():
     query = {
         "type": "emaitza",
         "liga": "ACT",

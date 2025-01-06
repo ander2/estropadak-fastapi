@@ -59,7 +59,6 @@ def get_points_per_race(league: str, year: int, category: str):
         year)
     estropadak_ = [estropada for estropada in estropadak_['docs'] if not estropada['izena'].startswith('Play')]
     if sailkapena:
-        points_max = len(sailkapena['stats'])
         for taldea, stats in sailkapena['stats'].items():
             team_values = {
                 "key": taldea,
@@ -77,7 +76,6 @@ def get_points_per_race(league: str, year: int, category: str):
                     "value": val[0]}
                     for i, val in enumerate(zip(points, estropadak_))]
             else:
-                points_max = stats['points'] + stats.get('discard', 0)
                 points = []
                 cumulative = [0] + stats['cumulative']
                 for i, point in enumerate(cumulative):

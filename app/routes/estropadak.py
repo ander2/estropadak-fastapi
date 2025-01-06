@@ -19,7 +19,9 @@ router = APIRouter(
 
 
 @router.get("", response_model=EstropadakList)
-async def get_estropadak(year: int | None = None, league: EstropadaTypeEnum | None = None, page: int = 0, count: int | None = PAGE_SIZE) -> Any:
+async def get_estropadak(year: int | None = None,
+                         league: EstropadaTypeEnum | None = None,
+                         page: int = 0, count: int | None = PAGE_SIZE) -> Any:
     kwargs = {}
     if year:
         kwargs['year'] = year
