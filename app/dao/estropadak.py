@@ -5,11 +5,10 @@ from ibm_cloud_sdk_core import ApiException
 from .models.estropadak import Estropada
 from .models.sailkapenak import Sailkapena
 from .db_connection import get_db_connection
-from app.config import PAGE_SIZE, config
+from app.config import DEFAULT_LOGGER, PAGE_SIZE, config
 from typing import Dict, List
 
-logger = logging.getLogger('estropadak')
-logger.setLevel(logging.DEBUG)
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 
 def get_estropada_by_id(id):

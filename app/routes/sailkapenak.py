@@ -20,7 +20,6 @@ from ..dao.sailkapenak import (
 
 access_security = JwtAccessBearer(secret_key=JWT_SECRET_KEY, auto_error=True)
 
-logger = logging.getLogger('estropadak')
 MIN_YEAR = 2003
 router = APIRouter(
     prefix="/sailkapenak",

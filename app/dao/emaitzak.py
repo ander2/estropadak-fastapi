@@ -2,11 +2,11 @@ import logging
 
 from ibm_cloud_sdk_core import ApiException
 
-from app.config import config
+from app.config import config, DEFAULT_LOGGER
 from ..dao.db_connection import get_db_connection
 from ..dao.models.sailkapenak import SailkapenaDoc
 
-logger = logging.getLogger('estropadak')
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 def get_emaitza_by_id(id):
     with get_db_connection() as database:

@@ -1,9 +1,5 @@
-import logging
-
 from ..dao.sailkapenak import get_sailkapena_by_id, insert_sailkapena_into_db, update_sailkapena_into_db
 from ..models.sailkapenak import Sailkapena
-
-logger = logging.getLogger('estropadak')
 
 
 def _encode_sailkapena(sailkapena: Sailkapena) -> dict:

@@ -1,5 +1,5 @@
 import os
-
+import logging
 
 config = {
     'COUCHDB': 'http://couchdb:5984',
@@ -33,3 +33,9 @@ JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', '')
 MIN_YEAR = 2002
 CATEGORIES = ['IG', 'IN', 'PG', 'PN', 'JG', 'JN', 'SG', 'SN']
 PAGE_SIZE = 50
+
+DEFAULT_LOGGER = 'estropadak'
+LOG_LEVEL = os.environ.get('LOG_LEVEL', logging.INFO)
+
+LOG_FORMAT = '%(levelname)-9s %(asctime)s %(module)s %(filename)-8s %(message)s'
+logging.basicConfig(format=LOG_FORMAT, level=LOG_LEVEL)

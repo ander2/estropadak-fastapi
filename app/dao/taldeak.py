@@ -3,10 +3,10 @@ import logging
 
 from ibm_cloud_sdk_core import ApiException
 
-from app.config import config
+from app.config import config, DEFAULT_LOGGER
 from .db_connection import get_db_connection
 
-logger = logging.getLogger('estropadak')
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 
 def get_taldea_by_id(id):

@@ -6,7 +6,6 @@ from app.models.estropadak import EstropadaTypeEnum
 from app.dao import taldeak
 from app.dao import plantilak
 
-logger = logging.getLogger('estropadak')
 MIN_YEAR = 2003
 router = APIRouter(
     prefix="/taldeak",

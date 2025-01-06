@@ -2,10 +2,11 @@ import logging
 
 from fastapi.testclient import TestClient
 from app.models.estropadak import EstropadaTypeEnum
+from app.config import DEFAULT_LOGGER
 from app.main import api as app
 
 client = TestClient(app)
-logger = logging.getLogger('estropadak')
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 
 def test_years():

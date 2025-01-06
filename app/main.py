@@ -8,7 +8,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi_jwt import JwtAccessBearer
-from app.config import config, JWT_SECRET_KEY
+from app.config import config, JWT_SECRET_KEY, DEFAULT_LOGGER
 from .models.login import Login
 from .routes.estatistikak import router as estatistikak_router
 from .routes.estropadak import router as estropadak_router
@@ -21,7 +21,7 @@ from .dao.years import get_active_year
 
 api = FastAPI()
 access_security = JwtAccessBearer(secret_key=JWT_SECRET_KEY, auto_error=True)
-logger = logging.getLogger('estropadak')
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 api.include_router(estatistikak_router)
 api.include_router(estropadak_router)

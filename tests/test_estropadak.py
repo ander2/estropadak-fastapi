@@ -4,10 +4,10 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from app.main import api as app
-from app.config import PAGE_SIZE
+from app.config import DEFAULT_LOGGER, PAGE_SIZE
 
 client = TestClient(app)
-logger = logging.getLogger('estropadak')
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 @pytest.fixture()
 def create_estropada(credentials):

@@ -3,10 +3,10 @@ import logging
 from ibm_cloud_sdk_core import ApiException
 
 from .db_connection import get_db_connection
-from app.config import config
+from app.config import config, DEFAULT_LOGGER
 
 
-logger = logging.getLogger('estropadak')
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 
 def get_sailkapena_by_league_year(league, year, category):
