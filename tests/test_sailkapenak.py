@@ -54,6 +54,22 @@ def test_sailkapena_for_team():
     assert team_is_there
 
 
+def test_sailkapena_for_multiple_teams():
+    rv = client.get('/sailkapenak?league=ARC1&teams=Arkote&teams=Astillero')
+    assert rv.status_code == 200
+    sailkapena = rv.json()
+    keys = ['wins', 'positions', 'position', 'points', 'best', 'worst',
+            'cumulative', 'age', 'rowers']
+    assert sailkapena['total'] == 9
+    team_are_there = False
+    for stat in sailkapena['docs'][0]['stats']:
+        if stat['name'] == 'Arkote' or stat['name'] == 'Astillero':
+            team_are_there = True
+            assert all(izenburua in keys for izenburua in stat['value'].keys())
+        assert team_are_there
+        team_are_there = False
+
+
 def test_sailkapena_for_team_that_not_exists():
     rv = client.get('/sailkapenak?league=ACT&teams=Oria')
     assert rv.status_code == 200

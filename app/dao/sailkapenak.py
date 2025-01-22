@@ -85,39 +85,65 @@ def get_sailkapenak_by_teams(league: str, year: str, teams: list[str]):
             doc_count = 0
             result = []
             for team in teams:
-                key = [team, league, year]
+                key = [team, league]
+                end_key= [team, league]
+                if year:
+                    key.push(year)
+                    end_key = [team, key[1] + 1]
+                else:
+                    end_key = [team, key[1] + '_']
+                logger.debug(f'>>{key} {end_key}')
                 res = database.post_view(
                     config["DBNAME"],
                     "sailkapenak",
                     "by_team",
-                    key=key,
+                    start_key=key,
+                    end_key=end_key,
                     include_docs=False,
                     reduce=True,
                 )
                 sailkapenak_count = res.get_result()
                 if len(sailkapenak_count['rows']) > 0:
                     doc_count = doc_count + sailkapenak_count.get('rows', [{'value': 0}])[0]['value']
-                    sailkapenak = database.post_view(
+                    res = database.post_view(
                         config["DBNAME"],
                         "sailkapenak",
                         "by_team",
-                        key=key,
+                        start_key=key,
+                        end_key=end_key,
                         include_docs=False,
                         reduce=False,
                     )
+                    sailkapenak = res.get_result()
                     for emaitza in sailkapenak['rows']:
-                        doc = database[emaitza['id']]
+                        parts = emaitza['id'].split('_')
+                        res = database.get_document(config["DBNAME"], emaitza['id'])
+                        doc = res.get_result()
+                        doc_ = {}
                         for name, stat in doc['stats'].items():
                             if name == team:
-                                doc['stats'] = [{
+                                stat_ = {
                                     "name": team,
                                     "value": stat
-                                }]
+                                }
+                                league_ = parts[1]
+                                year_ = parts[2]
+                                doc_['year'] = year_
+                                doc_['league'] = league_
+                                doc_['stats'] = [stat_]
                                 break
-                        result.append(doc)
+                        if len(result) == 0:
+                            result.append(doc_)
+                        found = False
+                        for res in result:
+                            if res['year'] == year_:
+                                res['stats'].append(stat_)
+                                found = True
+                        if not found:
+                            result.append(doc_)
             logger.debug(result)
             return {
-                'total': doc_count,
+                'total': len(result),
                 'docs': result
             }
         except KeyError:

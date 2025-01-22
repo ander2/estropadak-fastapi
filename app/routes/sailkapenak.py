@@ -30,8 +30,8 @@ router = APIRouter(
 
 @router.get("", response_model=SailkapenakList)
 async def get_sailkapenak(
-    year: int | None = None,
     league: EstropadaTypeEnum | None = None,
+    year: int | None = None,
     teams: Annotated[list[str] | None, Query()] = None,
     category=None
 ) -> Any:
@@ -46,7 +46,7 @@ async def get_sailkapenak(
         return {'total': 0, 'docs': []}
 
     if teams:
-        team_stats = get_sailkapenak_by_teams(league, year, teams)
+        team_stats = get_sailkapenak_by_teams(league.name, year, teams)
         return team_stats
     else:
         res = []
