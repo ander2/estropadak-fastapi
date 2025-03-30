@@ -130,6 +130,8 @@ def get_estropadak_by_year(year, page=0, count=20):
                 for row in res['rows']:
                     logger.debug(row)
                     estropada = row['doc']
+                    estropada['id'] = row['doc']['_id']
+                    del estropada['_id']
                     estropada['data'] = estropada['data'].replace(' ', 'T')
                     if estropada['liga'] == 'euskotren':
                         estropada['liga'] = estropada['liga'].upper()
