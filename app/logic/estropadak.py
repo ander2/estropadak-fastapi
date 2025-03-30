@@ -21,7 +21,7 @@ class EstropadakLogic():
             delattr(estropada, 'sailkapena')
         estropada_ = EstropadaModel(
             _id=id,
-            type=type,
+            type="estropada",
             sailkapena=sailkapena,
             **estropada.model_dump(exclude_unset=True)
         )

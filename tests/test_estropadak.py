@@ -17,7 +17,8 @@ def create_estropada(credentials):
         "izena": "Estropada test4",
         "data": "2021-06-02 17:00",
         "liga": "ARC1",
-        "sailkapena": []
+        "sailkapena": [],
+        "type": "estropada"
     }, headers=[('Authorization', f'Bearer {token}')])
     yield "2021-06-02_ARC1_Estropada-test4"
     client.delete('/estropadak/2021-06-02_ARC1_Estropada-test4', headers=[('Authorization', f'Bearer {token}')])
@@ -164,7 +165,8 @@ def test_estropada_creation_with_credentials(credentials, clean_up):
         "data": "2021-06-01 17:00",
         "liga": "ACT",
         "sailkapena": [],
-        "lekua": "Nonbait"
+        "lekua": "Nonbait",
+        "type": "estropada"
     }, headers=[('Authorization', f'Bearer {token}')])
     assert rv.status_code == 201
 
