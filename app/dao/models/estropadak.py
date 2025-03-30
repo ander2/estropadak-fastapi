@@ -1,4 +1,4 @@
-import json 
+import json
 from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum
@@ -9,11 +9,11 @@ class Encoder(json.JSONEncoder):
 
     def default(self, o):
         return dict(
-            izena=o.__izena, 
-            data=o.__data, 
+            izena=o.__izena,
+            data=o.__data,
             liga=o.__liga,
-            urla=o.__urla, 
-            lekua=o.__lekua, 
+            urla=o.__urla,
+            lekua=o.__lekua,
             sailkapena=o.__sailkapena)
 
 
@@ -38,7 +38,7 @@ class Estropada:
     sailkapena: list[Sailkapena] = field(default_factory=list)
     bi_jardunaldiko_bandera: bool = False
     jardunaldia: int = 1
-    bi_eguneko_sailkapena: list = field(default_factory=list) 
+    bi_eguneko_sailkapena: list = field(default_factory=list)
     related_estropada: str | None = None
     urla: str | None = None
     puntuagarria: bool = True
@@ -57,9 +57,9 @@ class Estropada:
         return self.format_for_json(self)
 
     def format_for_json(self, o):
-        attrs = ['_id', 'izena', 'data', 'liga', 
-                 'urla', 'lekua', 'oharrak', 'kategoriak', 
-                 'puntuagarria']
+        attrs = ['_id', 'izena', 'data', 'liga',
+                 'urla', 'lekua', 'oharrak', 'kategoriak',
+                 'puntuagarria', 'type']
         obj = {}
         for at in attrs:
             if hasattr(o, at):
