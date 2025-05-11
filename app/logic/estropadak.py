@@ -44,12 +44,9 @@ class EstropadakLogic():
         type = 'estropada'
         if estropada.liga == 'EUSKOTREN':
             estropada.liga = 'euskotren'
-        # if estropada.get('sailkapena', []):
-        #     # todo implement EmaitzaLogic.create_emaitza
-        #     pass
         estropada_ = EstropadaModel(_id=estropada_id,
                                     type=type,
-                                    **estropada.model_dump(exclude_unset=True))
+                                    **estropada.model_dump(exclude=("id",), exclude_unset=True))
         return estropadak.update_estropada_into_db(estropada_id, estropada_)
 
     @staticmethod
