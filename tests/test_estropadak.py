@@ -149,7 +149,16 @@ def test_estropada():
     rv = client.get('/estropadak/1c79d46b8c74ad399d54fd7ee40005e3')
     assert rv.status_code == 200
     estropada = rv.json()
-    assert estropada['izena'] == 'III Bandera Euskadi Basque Country'
+    assert estropada["izena"] == "III Bandera Euskadi Basque Country"
+    assert estropada["id"] == "1c79d46b8c74ad399d54fd7ee40005e3"
+    assert estropada["data"] == "2015-06-28T12:00:00"
+    assert estropada["lekua"] == "Málaga"
+    assert estropada["liga"] == "ACT"
+    assert not estropada["bi_jardunaldiko_bandera"]
+    assert estropada["urla"] == "http://www.euskolabelliga.com/resultados/ver.php?id=eu&r=1427700021"
+    assert estropada["puntuagarria"]
+    assert estropada["oharrak"] == "" or estropada["oharrak"] == None
+    assert len(estropada["sailkapena"]) == 12
 
 
 def test_estropada_not_found():

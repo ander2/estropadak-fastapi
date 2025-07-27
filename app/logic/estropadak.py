@@ -50,15 +50,15 @@ class EstropadakLogic():
         return estropadak.update_estropada_into_db(estropada_id, estropada_)
 
     @staticmethod
-    def get_estropada(estropada_id):
+    def get_estropada(estropada_id) -> Estropada:
         estropada = estropadak.get_estropada_by_id(estropada_id)
-        if estropada and estropada.get('bi_jardunaldiko_bandera'):
+        if estropada and estropada.bi_jardunaldiko_bandera:
             estropada['bi_eguneko_sailkapena'] = []
-            estropada_bi = estropadak.get_estropada_by_id(estropada['related_estropada'])
-            if (len(estropada.get('sailkapena', [])) > 0 and
-                len(estropada_bi.get('sailkapena', [])) > 0):
-                denborak_bat = {sailk['talde_izena']: sailk['denbora'] for sailk in estropada['sailkapena']}
-                denborak_bi = {sailk['talde_izena']: sailk['denbora'] for sailk in estropada_bi['sailkapena']}
+            estropada_bi = estropadak.get_estropada_by_id(estropada.related_estropada)
+            if (len(estropada.sailkapena) > 0 and
+                len(estropada_bi.sailkapena) > 0):
+                denborak_bat = {sailk.talde_izena: sailk['denbora'] for sailk in estropada.sailkapena}
+                denborak_bi = {sailk.talde_izena: sailk['denbora'] for sailk in estropada_bi.sailkapena}
                 for taldea, denbora in denborak_bat.items():
                     try:
                         denb1 = datetime.datetime.strptime(denbora, '%M:%S,%f')
@@ -72,17 +72,17 @@ class EstropadakLogic():
                     except ValueError:
                         if denbora.startswith('Exc') or denborak_bi[taldea].startswith('Exc'):
                             totala_str = 'Excl.'
-                    estropada['bi_eguneko_sailkapena'].append({
+                    estropada.bi_eguneko_sailkapena.append(Sailkapena(**{
                         'talde_izena': taldea,
                         'lehen_jardunaldiko_denbora': denbora,
                         'bigarren_jardunaldiko_denbora': denborak_bi[taldea],
                         'denbora_batura': totala_str,
-                    })
-                    estropada['bi_eguneko_sailkapena'] = sorted(
-                        estropada['bi_eguneko_sailkapena'],
-                        key=lambda x: x['denbora_batura'])
-                    for ind, item in enumerate(estropada['bi_eguneko_sailkapena']):
-                        item['posizioa'] = ind + 1
+                    }))
+                    estropada.bi_eguneko_sailkapena = sorted(
+                        estropada.bi_eguneko_sailkapena,
+                        key=lambda x: x.denbora_batura)
+                    for ind, item in enumerate(estropada.bi_eguneko_sailkapena):
+                        item.posizioa = ind + 1
         return estropada
 
     def _validate_league_year(self, league: str, year: int) -> bool:

@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 
 
@@ -20,7 +20,7 @@ class EstropadaTypeEnum(StrEnum):
 
 
 class Estropada(BaseModel):
-    id: str | None = None
+    id: str | None = Field(default=None, alias="_id", serialization_alias='id')
     izena: str
     data: datetime
     lekua: str = None

@@ -68,5 +68,5 @@ class Estropada:
                 else:
                     obj[at] = getattr(o, at)
         if hasattr(o, 'sailkapena'):
-            obj['sailkapena'] = [sailk.format_for_json() for sailk in sorted(o.sailkapena)]
+            obj['sailkapena'] = [sailk.format_for_json() for sailk in sorted(o.sailkapena, key=lambda x:x.posizioa)]
         return obj

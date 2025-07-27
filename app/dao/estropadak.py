@@ -11,7 +11,7 @@ from typing import Dict, List
 logger = logging.getLogger(DEFAULT_LOGGER)
 
 
-def get_estropada_by_id(id):
+def get_estropada_by_id(id) -> Estropada:
     with get_db_connection() as database:
         try:
             res = database.get_document(config["DBNAME"], id)
@@ -19,13 +19,15 @@ def get_estropada_by_id(id):
             estropada['data'] = estropada['data'].replace(' ', 'T')
             if estropada['liga'] == 'euskotren':
                 estropada['liga'] = estropada['liga'].upper()
+            sailkapena = [Sailkapena(**s) for s in estropada["sailkapena"]]
+            del estropada['sailkapena']
         except TypeError:
             logging.error("Not found", exc_info=1)
-            estropada = None
+            return None
         except ApiException:
             logging.info(f"Estropada document with id {id} not found")
-            estropada = None
-        return estropada
+            return None
+        return Estropada(**estropada, sailkapena=sailkapena)
 
 
 def get_estropadak_by_league_year(league, year, page=0, count=PAGE_SIZE) -> Dict[str, List[Dict]]:

@@ -55,8 +55,8 @@ async def post_estropada(
 
 
 @router.get("/{doc_id}", response_model=Estropada)
-async def get_estropada(doc_id: str) -> Any:
-    estropada = estropadak.get_estropada_by_id(doc_id)
+async def get_estropada(doc_id: str) -> dict:
+    estropada = EstropadakLogic.get_estropada(doc_id)
     if not estropada:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return estropada
