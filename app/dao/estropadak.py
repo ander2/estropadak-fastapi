@@ -2,11 +2,10 @@ import logging
 
 from ibm_cloud_sdk_core import ApiException
 
-from .models.estropadak import Estropada
+from .models.estropadak import Estropada, EstropadaListResult
 from .models.sailkapenak import Sailkapena
 from .db_connection import get_db_connection
 from app.config import DEFAULT_LOGGER, PAGE_SIZE, config
-from typing import Dict, List
 
 logger = logging.getLogger(DEFAULT_LOGGER)
 
@@ -30,7 +29,7 @@ def get_estropada_by_id(id) -> Estropada:
         return Estropada(**estropada, sailkapena=sailkapena)
 
 
-def get_estropadak_by_league_year(league, year, page=0, count=PAGE_SIZE) -> Dict[str, List[Dict]]:
+def get_estropadak_by_league_year(league=None, year=None, page=0, count=PAGE_SIZE) -> EstropadaListResult:
     logging.info("League:%s and year: %s", league, year)
     print("League:%s and year: %s", league, year)
     start = []
@@ -82,11 +81,11 @@ def get_estropadak_by_league_year(league, year, page=0, count=PAGE_SIZE) -> Dict
                     limit=count)
                 res = estropadak.get_result()
                 for row in res['rows']:
-                    estropada = row['doc']
-                    estropada['id'] = row['doc']['_id']
-                    estropada['data'] = estropada['data'].replace(' ', 'T')
-                    if estropada['liga'] == 'euskotren':
-                        estropada['liga'] = estropada['liga'].upper()
+                    sailkapena = [Sailkapena(**s) for s in row['doc'].get("sailkapena", [])]
+                    del row['doc']['sailkapena']
+                    estropada = Estropada(**row['doc'], sailkapena=sailkapena)
+                    if estropada.liga == 'euskotren':
+                        estropada.liga = estropada.liga.upper()
                     result.append(estropada)
 
             return {
@@ -97,7 +96,7 @@ def get_estropadak_by_league_year(league, year, page=0, count=PAGE_SIZE) -> Dict
             return {'error': 'Estropadak not found'}, 404
 
 
-def get_estropadak_by_year(year, page=0, count=20):
+def get_estropadak_by_year(year, page=0, count=20) -> EstropadaListResult:
     start = [year]
     end = [year + 1]
     result = []
@@ -130,13 +129,11 @@ def get_estropadak_by_year(year, page=0, count=20):
                     limit=count)
                 res = estropadak.get_result()
                 for row in res['rows']:
-                    logger.debug(row)
-                    estropada = row['doc']
-                    estropada['id'] = row['doc']['_id']
-                    del estropada['_id']
-                    estropada['data'] = estropada['data'].replace(' ', 'T')
-                    if estropada['liga'] == 'euskotren':
-                        estropada['liga'] = estropada['liga'].upper()
+                    sailkapena = [Sailkapena(**s) for s in row['doc'].get("sailkapena", [])]
+                    del row['doc']['sailkapena']
+                    estropada = Estropada(**row['doc'], sailkapena=sailkapena)
+                    if estropada.liga == 'euskotren':
+                        estropada.liga = estropada.liga.upper()
                     result.append(estropada)
         except KeyError:
             return {'error': 'Estropadak not found'}, 404
@@ -146,23 +143,11 @@ def get_estropadak_by_year(year, page=0, count=20):
         }
 
 
-def get_estropadak(**kwargs):
-    if kwargs.get('year') and kwargs.get('league'):
-        return get_estropadak_by_league_year(
-            kwargs['league'],
-            kwargs['year'],
-            kwargs['page'],
-            kwargs['count'])
-    elif kwargs.get('year') and not kwargs.get('league'):
-        return get_estropadak_by_year(kwargs.pop('year'), **kwargs)
-    elif kwargs.get('league') and not kwargs.get('year'):
-        return get_estropadak_by_league_year(
-            kwargs['league'],
-            None,
-            kwargs['page'],
-            kwargs['count'])
+def get_estropadak(**kwargs) -> EstropadaListResult:
+    if kwargs.get('year') and not kwargs.get('league'):
+        return get_estropadak_by_year(**kwargs)
     else:
-        return get_estropadak_by_league_year(None, None)
+        return get_estropadak_by_league_year(**kwargs)
 
 
 

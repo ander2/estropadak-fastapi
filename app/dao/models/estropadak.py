@@ -3,6 +3,7 @@ from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum
 from .sailkapenak import Sailkapena
+from typing import TypedDict
 
 
 class Encoder(json.JSONEncoder):
@@ -70,3 +71,7 @@ class Estropada:
         if hasattr(o, 'sailkapena'):
             obj['sailkapena'] = [sailk.format_for_json() for sailk in sorted(o.sailkapena, key=lambda x:x.posizioa)]
         return obj
+
+class EstropadaListResult(TypedDict):
+   total: int
+   docs: list[Estropada]

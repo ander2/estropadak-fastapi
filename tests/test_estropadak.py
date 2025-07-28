@@ -126,6 +126,15 @@ def test_estropadak_list_without_results():
     assert estropadak['total'] == 0
 
 
+def test_estropadak_list_only_count_limit():
+    rv = client.get('/estropadak?count=2')
+    assert rv.status_code == 200
+    estropadak = rv.json()
+    assert 'docs' in estropadak
+    assert 'total' in estropadak
+    assert len(estropadak['docs']) == 2
+
+
 def test_estropadak_list_with_wrong_league():
     rv = client.get('/estropadak?league=actt&year=2010')
     assert rv.status_code == 400
