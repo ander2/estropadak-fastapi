@@ -49,3 +49,12 @@ class SailkapenaDoc(Sailkapena):
     estropada_id: str
     liga: str
     talde_izen_normalizatua: str
+
+
+@dataclass(kw_only=True)
+class SailkapenBateratua():
+    talde_izena: str
+    lehen_jardunaldiko_denbora: str
+    bigarren_jardunaldiko_denbora: str
+    denbora_batura: str
+    posizioa: int = 0
