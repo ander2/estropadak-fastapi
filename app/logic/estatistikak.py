@@ -28,15 +28,15 @@ def get_culumative_stats(league, year, team, category):
         estropadak_ = estropadak.get_estropadak_by_league_year(league, year)
         estropadak_ = [
             estropada for estropada in estropadak_['docs']
-            if not estropada['izena'].startswith('Play')
-            and estropada.get('puntuagarria', True)
+            if not estropada.izena.startswith('Play')
+            and estropada.puntuagarria
         ]
         for taldea, stats in sailkapena['stats'].items():
             team_values = {
                 "key": taldea,
                 "color": get_team_color(taldea),
             }
-            values = [{"label": val[1]['izena'],
+            values = [{"label": val[1].izena,
                         "x": i,
                         "value": val[0]}
                         for i, val in enumerate(zip(stats['cumulative'], estropadak_))]
@@ -57,7 +57,7 @@ def get_points_per_race(league: str, year: int, category: str):
     estropadak_ = estropadak.get_estropadak_by_league_year(
         league,
         year)
-    estropadak_ = [estropada for estropada in estropadak_['docs'] if not estropada['izena'].startswith('Play')]
+    estropadak_ = [estropada for estropada in estropadak_['docs'] if not estropada.izena.startswith('Play')]
     if sailkapena:
         for taldea, stats in sailkapena['stats'].items():
             team_values = {
@@ -71,7 +71,7 @@ def get_points_per_race(league: str, year: int, category: str):
                     points.append(point-stats['cumulative'][index])
                     index += 1
                 values = [{
-                    "label": val[1]['izena'],
+                    "label": val[1].izena,
                     "x": i,
                     "value": val[0]}
                     for i, val in enumerate(zip(points, estropadak_))]
@@ -84,7 +84,7 @@ def get_points_per_race(league: str, year: int, category: str):
                     except Exception:
                         break
                 values = [{
-                    "label": val[1]['izena'],
+                    "label": val[1].izena,
                     "x": i,
                     "value": val[0]} for i, val in enumerate(zip(points, estropadak_))
                 ]

@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from dataclasses import dataclass, field
 from enum import Enum
-from .sailkapenak import Sailkapena
+from .sailkapenak import Sailkapena, SailkapenBateratua
 from typing import TypedDict
 
 
@@ -39,7 +39,7 @@ class Estropada:
     sailkapena: list[Sailkapena] = field(default_factory=list)
     bi_jardunaldiko_bandera: bool = False
     jardunaldia: int = 1
-    bi_eguneko_sailkapena: list = field(default_factory=list)
+    bi_eguneko_sailkapena: list[SailkapenBateratua] = field(default_factory=list)
     related_estropada: str | None = None
     urla: str | None = None
     puntuagarria: bool = True
