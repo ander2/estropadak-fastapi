@@ -57,8 +57,12 @@ class EstropadakLogic():
             estropada_bi = estropadak.get_estropada_by_id(estropada.related_estropada)
             if (len(estropada.sailkapena) > 0 and
                 len(estropada_bi.sailkapena) > 0):
-                denborak_bat = {sailk.talde_izena: sailk.denbora for sailk in estropada.sailkapena}
-                denborak_bi = {sailk.talde_izena: sailk.denbora for sailk in estropada_bi.sailkapena}
+                if estropada.jardunaldia == 1:
+                    denborak_bat = {sailk.talde_izena: sailk.denbora for sailk in estropada.sailkapena}
+                    denborak_bi = {sailk.talde_izena: sailk.denbora for sailk in estropada_bi.sailkapena}
+                else:
+                    denborak_bat = {sailk.talde_izena: sailk.denbora for sailk in estropada_bi.sailkapena}
+                    denborak_bi = {sailk.talde_izena: sailk.denbora for sailk in estropada.sailkapena}
                 for taldea, denbora in denborak_bat.items():
                     try:
                         denb1 = datetime.datetime.strptime(denbora, '%M:%S,%f')
