@@ -79,7 +79,7 @@ def get_sailkapena_by_id(id: str):
             return None  # {'error': 'Sailkapena not found'}, 404
 
 
-def get_sailkapenak_by_teams(league: str, year: str, teams: list[str]):
+def get_sailkapenak_by_teams(league: str, year: int, teams: list[str]):
     with get_db_connection() as database:
         try:
             doc_count = 0
@@ -88,8 +88,8 @@ def get_sailkapenak_by_teams(league: str, year: str, teams: list[str]):
                 key = [team, league]
                 end_key= [team, league]
                 if year:
-                    key.push(year)
-                    end_key = [team, key[1] + 1]
+                    key.append(year)
+                    end_key = [team, league, year]
                 else:
                     end_key = [team, key[1] + '_']
                 logger.debug(f'>>{key} {end_key}')

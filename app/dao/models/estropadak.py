@@ -46,31 +46,6 @@ class Estropada:
     kategoriak: list = field(default_factory=list)
     oharrak: str | None = None
 
-    def print_json(self):
-        print(json.dumps(self, default=self.format_for_json,
-                         ensure_ascii=False, indent=4))
-
-    def dump_json(self):
-        return json.dumps(self, default=self.format_for_json,
-                          ensure_ascii=False, cls=Encoder, indent=4)
-
-    def dump_dict(self):
-        return self.format_for_json(self)
-
-    def format_for_json(self, o):
-        attrs = ['_id', 'izena', 'data', 'liga',
-                 'urla', 'lekua', 'oharrak', 'kategoriak',
-                 'puntuagarria', 'type']
-        obj = {}
-        for at in attrs:
-            if hasattr(o, at):
-                if at == 'data' and type(getattr(o, at)) is datetime:
-                    obj[at] = getattr(o, at).isoformat()
-                else:
-                    obj[at] = getattr(o, at)
-        if hasattr(o, 'sailkapena'):
-            obj['sailkapena'] = [sailk.format_for_json() for sailk in sorted(o.sailkapena, key=lambda x:x.posizioa)]
-        return obj
 
 class EstropadaListResult(TypedDict):
    total: int

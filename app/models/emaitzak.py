@@ -18,3 +18,8 @@ class Emaitza(BaseModel):
     tanda_postua: int
     tanda: int
     ziabogak: list[str] = []
+
+
+class EmaitzakList(BaseModel):
+    total: int = 0
+    docs: list[Emaitza] = []

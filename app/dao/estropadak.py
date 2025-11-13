@@ -1,5 +1,7 @@
 import logging
 
+from dataclasses import asdict
+
 from ibm_cloud_sdk_core import ApiException
 
 from .models.estropadak import Estropada, EstropadaListResult
@@ -151,11 +153,14 @@ def get_estropadak(**kwargs) -> EstropadaListResult:
 
 
 
-def insert_estropada_into_db(estropada: Estropada):
+def insert_estropada_into_db(estropada: Estropada) -> Estropada:
     if estropada.liga == 'EUSKOTREN':
         estropada.liga = estropada.liga.lower()
     with get_db_connection() as database:
-        res = database.post_document(config["DBNAME"], estropada.dump_dict())
+        _estropada = asdict(estropada)
+        _estropada["data"] = _estropada["data"].isoformat()
+        del _estropada["_rev"]
+        res = database.post_document(config["DBNAME"], _estropada)
         new_estropada_result = res.get_result()
         res = database.get_document(config["DBNAME"], new_estropada_result["id"])
         new_estropada = res.get_result()

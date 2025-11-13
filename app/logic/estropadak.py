@@ -1,4 +1,5 @@
 import datetime
+from dataclasses import asdict
 
 from ..models.estropadak import Estropada
 from ..dao import estropadak, years
@@ -10,7 +11,7 @@ from ..logic.emaitzak import EmaitzakLogic
 class EstropadakLogic():
 
     @staticmethod
-    def create_estropada(estropada: Estropada):
+    def create_estropada(estropada: Estropada) -> Estropada:
         izena = estropada.izena.replace(' ', '-')
         id = f'{estropada.data.strftime("%Y-%m-%d")}_{estropada.liga.value}_{izena}'
         if len(estropada.sailkapena) > 0:
@@ -25,19 +26,12 @@ class EstropadakLogic():
             sailkapena=sailkapena,
             **estropada.model_dump(exclude_unset=True)
         )
-        # data = None
-        # try:
-        #     data = datetime.datetime.fromisoformat(estropada.data)
-        #     logging.info(data)
-        # except ValueError:
-        #     data = datetime.datetime.strptime(estropada.data, '%Y-%m-%d %H:%M')
-        #     estropada['data'] = data.isoformat()
 
         if estropada_.sailkapena:
             EmaitzakLogic.create_emaitzak_from_estropada(estropada_)
 
         new_estropada = estropadak.insert_estropada_into_db(estropada_)
-        return new_estropada
+        return Estropada(**asdict(new_estropada))
 
     @staticmethod
     def update_estropada(estropada_id: str, estropada):
@@ -50,7 +44,7 @@ class EstropadakLogic():
         return estropadak.update_estropada_into_db(estropada_id, estropada_)
 
     @staticmethod
-    def get_estropada(estropada_id) -> Estropada:
+    def get_estropada(estropada_id) -> Estropada | None:
         estropada = estropadak.get_estropada_by_id(estropada_id)
         if estropada and estropada.bi_jardunaldiko_bandera:
             estropada.bi_eguneko_sailkapena = []
@@ -87,7 +81,10 @@ class EstropadakLogic():
                         key=lambda x: x.denbora_batura)
                     for ind, item in enumerate(estropada.bi_eguneko_sailkapena):
                         item.posizioa = ind + 1
-        return estropada
+        if estropada:
+            return Estropada(**asdict(estropada))
+        else:
+            return None
 
     def _validate_league_year(self, league: str, year: int) -> bool:
         if not league and not year:

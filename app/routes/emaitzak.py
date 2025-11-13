@@ -9,7 +9,7 @@ from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
 
 from ..dao import emaitzak
 from ..logic.emaitzak import EmaitzakLogic
-from ..models.emaitzak import Emaitza
+from ..models.emaitzak import Emaitza, EmaitzakList
 
 access_security = JwtAccessBearer(secret_key=JWT_SECRET_KEY, auto_error=True)
 
@@ -19,7 +19,7 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("")
+@router.get("", response_model=EmaitzakList)
 def get_emaitzak(criteria: str = '', page: int = 0, count: int = PAGE_SIZE):
     try:
         criteria = json.loads(criteria)

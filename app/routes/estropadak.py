@@ -44,18 +44,16 @@ async def post_estropada(
     try:
         estropada_ = EstropadakLogic.create_estropada(data)
         if estropada_:
-            result = estropada_.dump_dict()
-            result['id'] = result['_id']
-            return result
+            return estropada_
         else:
             raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE)
     except Exception as e:
         logging.error("Error while creating an estropada", exc_info=1)
-        return str(e), 400
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
 
 
 @router.get("/{doc_id}", response_model=Estropada)
-async def get_estropada(doc_id: str) -> dict:
+async def get_estropada(doc_id: str) -> Estropada:
     estropada = EstropadakLogic.get_estropada(doc_id)
     if not estropada:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
@@ -77,14 +75,13 @@ async def put_estropada(
         return str(e), 400
 
 
-@router.delete("/{doc_id}")
+@router.delete("/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_estropada(
     doc_id: str,
     credentials: JwtAuthorizationCredentials = Security(access_security),
-) -> dict:
+) -> None:
     try:
         EstropadakLogic.delete_estropada(doc_id)
-        return {}
-    except Exception as e:
-        logging.error("Error while deleting an estropada", exc_info=1)
-        return str(e), 400
+    except Exception:
+        logging.error("Error while deleting estropada %s", doc_id, exc_info=1)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)

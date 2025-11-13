@@ -40,7 +40,7 @@ def test_sailkapena_with_uppercase_league():
 
 
 def test_sailkapena_for_team():
-    rv = client.get('/sailkapenak?league=ACT&year=2017&team=Orio')
+    rv = client.get('/sailkapenak?league=ACT&year=2017&teams=Orio')
     assert rv.status_code == 200
     sailkapena = rv.json()
     keys = ['wins', 'positions', 'position', 'points', 'best', 'worst',

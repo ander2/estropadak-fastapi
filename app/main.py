@@ -19,7 +19,7 @@ from .routes.years import router as year_router
 from .dao.years import get_active_year
 
 
-api = FastAPI()
+api = FastAPI(root_path='/api')
 access_security = JwtAccessBearer(secret_key=JWT_SECRET_KEY, auto_error=True)
 logger = logging.getLogger(DEFAULT_LOGGER)
 
