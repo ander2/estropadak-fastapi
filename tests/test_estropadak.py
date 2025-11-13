@@ -1,7 +1,6 @@
 import logging
 import pytest
 
-from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from app.main import api as app
 from app.config import DEFAULT_LOGGER, PAGE_SIZE
@@ -166,7 +165,7 @@ def test_estropada():
     assert not estropada["bi_jardunaldiko_bandera"]
     assert estropada["urla"] == "http://www.euskolabelliga.com/resultados/ver.php?id=eu&r=1427700021"
     assert estropada["puntuagarria"]
-    assert estropada["oharrak"] == "" or estropada["oharrak"] == None
+    assert estropada["oharrak"] == "" or estropada["oharrak"] is None
     assert len(estropada["sailkapena"]) == 12
 
 
@@ -263,7 +262,7 @@ def test_estropada_deletion_with_credentials(credentials):
 
     rv = client.delete('/estropadak/2021-06-02_ARC1_Estropada-test3',
                        headers=[('Authorization', f'Bearer {token}')])
-    assert rv.status_code == 200
+    assert rv.status_code == 204
 
 
 def test_estropada_creation_with_missing_data_in_model(credentials):

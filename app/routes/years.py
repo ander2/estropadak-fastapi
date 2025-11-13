@@ -1,5 +1,3 @@
-import logging
-
 from fastapi import APIRouter, Security
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
 

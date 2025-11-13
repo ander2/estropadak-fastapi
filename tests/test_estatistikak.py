@@ -4,7 +4,6 @@ import pytest
 
 from fastapi.testclient import TestClient
 
-from app.dao.db_connection import get_db_connection
 from app.main import api as app
 
 client = TestClient(app)
