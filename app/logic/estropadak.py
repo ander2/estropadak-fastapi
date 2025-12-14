@@ -1,11 +1,13 @@
 import datetime
-from dataclasses import asdict
+import logging
 
-from ..models.estropadak import Estropada
 from ..dao import estropadak, years
-from ..dao.models.estropadak import Estropada as EstropadaModel
-from ..dao.models.sailkapenak import Sailkapena, SailkapenBateratua
 from ..logic.emaitzak import EmaitzakLogic
+from ..models.estropadak import Estropada
+from ..models.emaitzak import EmaitzaBateratua
+from app.config import DEFAULT_LOGGER
+
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 
 class EstropadakLogic():
@@ -14,34 +16,26 @@ class EstropadakLogic():
     def create_estropada(estropada: Estropada) -> Estropada:
         izena = estropada.izena.replace(' ', '-')
         id = f'{estropada.data.strftime("%Y-%m-%d")}_{estropada.liga.value}_{izena}'
-        if len(estropada.sailkapena) > 0:
-            sailkapena = [Sailkapena(**sailkapena) for sailkapena in estropada.sailkapena]
-            delattr(estropada, 'sailkapena')
-        else:
-            sailkapena = []
-            delattr(estropada, 'sailkapena')
-        estropada_ = EstropadaModel(
+        estropada_ = Estropada(
             _id=id,
-            type="estropada",
-            sailkapena=sailkapena,
             **estropada.model_dump(exclude_unset=True)
         )
 
-        if estropada_.sailkapena:
-            EmaitzakLogic.create_emaitzak_from_estropada(estropada_)
-
         new_estropada = estropadak.insert_estropada_into_db(estropada_)
-        return Estropada(**asdict(new_estropada))
+
+        logger.info(f"Generating emaitza for sailkapena: {len(estropada.sailkapena) > 0}")
+        if len(estropada.sailkapena) > 0:
+            EmaitzakLogic.create_emaitzak_from_estropada(new_estropada)
+
+        return Estropada(**new_estropada.model_dump(by_alias=True))
 
     @staticmethod
-    def update_estropada(estropada_id: str, estropada):
-        type = 'estropada'
+    def update_estropada(estropada_id: str, estropada: Estropada):
         if estropada.liga == 'EUSKOTREN':
             estropada.liga = 'euskotren'
-        estropada_ = EstropadaModel(_id=estropada_id,
-                                    type=type,
-                                    **estropada.model_dump(exclude=("id",), exclude_unset=True))
-        return estropadak.update_estropada_into_db(estropada_id, estropada_)
+        for emaitza in estropada.sailkapena:
+            EmaitzakLogic.update_emaitza(emaitza.id, emaitza)
+        return estropadak.update_estropada_into_db(estropada_id, estropada)
 
     @staticmethod
     def get_estropada(estropada_id) -> Estropada | None:
@@ -70,19 +64,19 @@ class EstropadakLogic():
                     except ValueError:
                         if denbora.startswith('Exc') or denborak_bi[taldea].startswith('Exc'):
                             totala_str = 'Excl.'
-                    estropada.bi_eguneko_sailkapena.append(SailkapenBateratua(**{
-                        'talde_izena': taldea,
-                        'lehen_jardunaldiko_denbora': denbora,
-                        'bigarren_jardunaldiko_denbora': denborak_bi[taldea],
-                        'denbora_batura': totala_str,
-                    }))
+                    estropada.bi_eguneko_sailkapena.append(EmaitzaBateratua(
+                        talde_izena=taldea,
+                        lehen_jardunaldiko_denbora=denbora,
+                        bigarren_jardunaldiko_denbora=denborak_bi[taldea],
+                        denbora_batura=totala_str
+                    ))
                     estropada.bi_eguneko_sailkapena = sorted(
                         estropada.bi_eguneko_sailkapena,
                         key=lambda x: x.denbora_batura)
                     for ind, item in enumerate(estropada.bi_eguneko_sailkapena):
                         item.posizioa = ind + 1
         if estropada:
-            return Estropada(**asdict(estropada))
+            return Estropada(**estropada.model_dump(by_alias=True))
         else:
             return None
 

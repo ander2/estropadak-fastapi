@@ -23,12 +23,11 @@ def create_estropada(credentials):
     client.delete('/estropadak/2021-06-02_ARC1_Estropada-test4', headers=[('Authorization', f'Bearer {token}')])
 
 @pytest.fixture()
-def create_estropada_with_sailkapena(credentials):
-    rv = client.post('/auth', json=credentials)
-    token = rv.json()['access_token']
-    rv = client.post('/estropadak', json={
+def estropada_with_sailkapena(credentials):
+    yield {
         "izena": "Estropada test",
         "data": "2021-06-01T17:00:00",
+        "lekua": "Leku bat",
         "liga": "ACT",
         "sailkapena": [{
             "talde_izena": "KAIKU",
@@ -44,11 +43,10 @@ def create_estropada_with_sailkapena(credentials):
                 "15:24"
             ]
         }]
-    }, headers=[('Authorization', f'Bearer {token}')])
-    assert rv.status_code == 201
-    estropada_id = rv.json()['id']
-    logger.debug(rv.json())
-    yield estropada_id
+    }
+    rv = client.post('/auth', json=credentials)
+    token = rv.json()['access_token']
+    estropada_id = "2021-06-01_ACT_Estropada-test"
     client.delete(f'/estropadak/{estropada_id}', headers=[('Authorization', f'Bearer {token}')])
     emaitza_id = "2021-06-01_ACT_Kaiku"
     client.delete(f'/emaitzak/{emaitza_id}', headers=[('Authorization', f'Bearer {token}')])
@@ -186,6 +184,9 @@ def test_estropada_creation_with_credentials(credentials, clean_up):
         "type": "estropada"
     }, headers=[('Authorization', f'Bearer {token}')])
     assert rv.status_code == 201
+    estropada = rv.json()
+    assert estropada['id'] == '2021-06-01_ACT_Estropada-test'
+    assert estropada['izena'] == 'Estropada test'
 
 
 def test_estropada_creation_with_credentials_Euskotren_liga(credentials):
@@ -256,11 +257,31 @@ def test_estropada_deletion_with_credentials(credentials):
         "izena": "Estropada test3",
         "data": "2021-06-02 17:00",
         "liga": "ARC1",
+        "lekua": "Leku bat",
         "sailkapena": []
     }, headers=[('Authorization', f'Bearer {token}')])
     assert rv.status_code == 201
 
     rv = client.delete('/estropadak/2021-06-02_ARC1_Estropada-test3',
+                       headers=[('Authorization', f'Bearer {token}')])
+    assert rv.status_code == 204
+
+def test_estropada_deletion_with_db_error(credentials, mocker):
+    rv = client.post('/auth', json=credentials)
+    token = rv.json()['access_token']
+
+    mocker.patch("app.dao.estropadak.get_db_connection", side_effect=Exception("Connection error"))
+    estropada_id = "foofoo"
+    rv = client.delete(f'/estropadak/{estropada_id}',
+                       headers=[('Authorization', f'Bearer {token}')])
+    assert rv.status_code == 400
+
+def test_estropada_deletion_on_non_existant_estropada(credentials):
+    rv = client.post('/auth', json=credentials)
+    token = rv.json()['access_token']
+
+    estropada_id = "foofoo"
+    rv = client.delete(f'/estropadak/{estropada_id}',
                        headers=[('Authorization', f'Bearer {token}')])
     assert rv.status_code == 204
 
@@ -295,9 +316,15 @@ def test_estropada_creation_with_unsupported_liga(credentials):
     assert rv.status_code == 400
 
 
-def test_estropada_creation_with_sailkapena(credentials, create_estropada_with_sailkapena):
-    estropada_id = create_estropada_with_sailkapena
+def test_estropada_creation_with_sailkapena(credentials, estropada_with_sailkapena):
+    rv = client.post('/auth', json=credentials)
+    token = rv.json()['access_token']
+
+    rv = client.post('/estropadak', json=estropada_with_sailkapena, headers=[('Authorization', f'Bearer {token}')])
+    estropada_id = rv.json()["id"]
+
     rv = client.get(f'/estropadak/{estropada_id}')
     assert rv.status_code == 200
+
     rv = client.get('/emaitzak/2021-06-01_ACT_Kaiku')
     assert rv.status_code == 200

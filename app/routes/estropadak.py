@@ -1,6 +1,5 @@
 import logging
 
-from typing import Any
 from app.config import PAGE_SIZE, JWT_SECRET_KEY
 from fastapi import APIRouter, HTTPException, Security, status
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
@@ -8,6 +7,9 @@ from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
 from ..dao import estropadak
 from ..logic.estropadak import EstropadakLogic
 from ..models.estropadak import Estropada, EstropadakList, EstropadaTypeEnum
+from app.config import DEFAULT_LOGGER
+
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 access_security = JwtAccessBearer(secret_key=JWT_SECRET_KEY, auto_error=True)
 
@@ -18,10 +20,10 @@ router = APIRouter(
 )
 
 
-@router.get("", response_model=EstropadakList)
+@router.get("", response_model=EstropadakList, response_model_by_alias=False)
 async def get_estropadak(year: int | None = None,
                          league: EstropadaTypeEnum | None = None,
-                         page: int = 0, count: int | None = PAGE_SIZE) -> Any:
+                         page: int = 0, count: int | None = PAGE_SIZE) -> EstropadakList:
     kwargs = {}
     if year:
         kwargs['year'] = year
@@ -35,7 +37,7 @@ async def get_estropadak(year: int | None = None,
     return estropadak_
 
 
-@router.post("", response_model=Estropada, status_code=status.HTTP_201_CREATED)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model_by_alias=False)
 async def post_estropada(
     estropada: Estropada,
     credentials: JwtAuthorizationCredentials = Security(access_security),
@@ -44,6 +46,7 @@ async def post_estropada(
     try:
         estropada_ = EstropadakLogic.create_estropada(data)
         if estropada_:
+            logger.info(estropada_)
             return estropada_
         else:
             raise HTTPException(status.HTTP_406_NOT_ACCEPTABLE)
@@ -52,11 +55,12 @@ async def post_estropada(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
 
 
-@router.get("/{doc_id}", response_model=Estropada)
+@router.get("/{doc_id}", response_model_by_alias=False)
 async def get_estropada(doc_id: str) -> Estropada:
     estropada = EstropadakLogic.get_estropada(doc_id)
     if not estropada:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    logger.info(estropada)
     return estropada
 
 
@@ -66,13 +70,12 @@ async def put_estropada(
     estropada: Estropada,
     credentials: JwtAuthorizationCredentials = Security(access_security),
 ) -> dict:
-    data = estropada
     try:
-        EstropadakLogic.update_estropada(doc_id, data)
+        EstropadakLogic.update_estropada(doc_id, estropada)
         return {}
     except Exception as e:
-        logging.error("Error while updating an estropada", exc_info=1)
-        return str(e), 400
+        logging.error("Error while updating estropada %s", doc_id, exc_info=1)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
 
 
 @router.delete("/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from .estropadak import EstropadaTypeEnum
+from .estropada_type import EstropadaTypeEnum
 
 
 class Rower(BaseModel):

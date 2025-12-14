@@ -34,7 +34,7 @@ async def get_sailkapenak(
     year: int | None = None,
     teams: Annotated[list[str] | None, Query()] = None,
     category=None
-) -> Any:
+) -> SailkapenakList:
     stats = None
     if year is None:
         stats = get_sailkapena_by_league(league)
@@ -67,10 +67,10 @@ async def get_sailkapenak(
 @router.get("/{sailkapena_id}", response_model=Sailkapena)
 async def get_sailkapena(sailkapena_id: str) -> Sailkapena:
     sailkapena = get_sailkapena_logic(sailkapena_id)
-    if sailkapena is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    else:
+    if sailkapena:
         return sailkapena
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 @router.put("/{sailkapena_id}", response_model=Sailkapena)

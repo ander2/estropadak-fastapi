@@ -1,31 +1,27 @@
-from enum import StrEnum
-
-from pydantic import BaseModel, Field
+from enum import Enum
 from datetime import datetime
 
+from pydantic import BaseModel, Field
 
-class EstropadaTypeEnum(StrEnum):
-    ACT = 'ACT'
-    ARC1 = 'ARC1'
-    ARC2 = 'ARC2'
-    ETE = 'ETE'
-    EUSKOTREN = 'EUSKOTREN'
-    euskotren = 'euskotren'
-    KONTXA = 'KONTXA'
-    GBL = 'GBL'
-    BBL = 'BBL'
-    BTL = 'BTL'
-    GTL = 'GTL'
-    TXAPELKETAK = 'TXAPELKETAK'
+from .emaitzak import EmbedEmaitza
+from .estropada_type import EstropadaTypeEnum
 
+# class EstropadaTypeEnum(str, Enum):
+#     ACT = 'ACT'
+#     ARC1 = 'ARC1'
+#     ARC2 = 'ARC2'
+#     ETE = 'ETE'
+#     EUSKOTREN = 'EUSKOTREN'
+#     KONTXA = 'KONTXA'
 
 class Estropada(BaseModel):
-    id: str | None = Field(default=None, alias="_id", serialization_alias='id')
+    id: str = Field(default=None, alias="_id")
+    rev: str = Field(default=None, alias="_rev")
     izena: str
     data: datetime
     lekua: str = None
     liga: EstropadaTypeEnum
-    sailkapena: list = []
+    sailkapena: list[EmbedEmaitza] = []
     bi_jardunaldiko_bandera: bool = False
     jardunaldia: int = 1
     bi_eguneko_sailkapena: list = []

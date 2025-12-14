@@ -2,13 +2,14 @@ import logging
 
 from ibm_cloud_sdk_core import ApiException
 
-from app.config import config, DEFAULT_LOGGER
 from ..dao.db_connection import get_db_connection
-from ..dao.models.sailkapenak import SailkapenaDoc
+from ..models.emaitzak import Emaitza
+from app.config import config, DEFAULT_LOGGER
 
 logger = logging.getLogger(DEFAULT_LOGGER)
 
-def get_emaitza_by_id(id):
+
+def get_emaitza_by_id(id) -> Emaitza | None:
     with get_db_connection() as database:
         try:
             res = database.get_document(config["DBNAME"], id)
@@ -63,7 +64,7 @@ def get_estropadak_by_team(team, league_id):
             return {'error': 'Estropadak not found'}, 404
 
 
-def get_emaitzak(criteria: dict, page: int, count: int):
+def get_emaitzak(criteria: dict, page: int, count: int) -> tuple[list[Emaitza], int]:
     start = page * count
     end = start + count
     docs = []
@@ -82,21 +83,25 @@ def get_emaitzak(criteria: dict, page: int, count: int):
         return (docs, total,)
 
 
-def insert_emaitza_into_db(emaitza: SailkapenaDoc):
-    emaitza_ = emaitza.dump_dict()
-    logger.debug(emaitza_)
+def insert_emaitza_into_db(emaitza: Emaitza) -> bool:
+    emaitza_ = emaitza.model_dump(by_alias=True, exclude=("rev",))
+    emaitza_["estropada_data"] = emaitza.estropada_data.isoformat()
+    emaitza_["type"] = "emaitza"
+    logger.info(emaitza_)
     with get_db_connection() as database:
         res = database.post_document(config["DBNAME"], emaitza_)
         document = res.get_result()
+        logger.info(f"{emaitza.id} document creation result: {document}")
         return document is not None
 
 
-def update_emaitza_into_db(emaitza_id, emaitza):
-    emaitza_ = emaitza.dump_dict()
+def update_emaitza_into_db(emaitza_id: str, emaitza: Emaitza) -> bool:
+    emaitza_ = emaitza.model_dump()
     with get_db_connection() as database:
         res = database.get_document(config["DBNAME"], emaitza_id)
         document = res.get_result()
         if document:
+            emaitza_['estropada_data'] = emaitza_['estropada_data'].isoformat()
             document.update(emaitza_)
             database.put_document(config["DBNAME"], emaitza_id, document, rev=document["_rev"])
             return True
@@ -104,7 +109,7 @@ def update_emaitza_into_db(emaitza_id, emaitza):
             return None
 
 
-def delete_emaitza_from_db(emaitza_id):
+def delete_emaitza_from_db(emaitza_id) -> bool:
     with get_db_connection() as database:
         try:
             res = database.get_document(config["DBNAME"], emaitza_id)

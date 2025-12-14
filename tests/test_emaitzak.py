@@ -27,6 +27,25 @@ def clean_up():
             except Exception:
                 pass
 
+def test_emaitzak_by_id():
+    emaitza_id = "2019-06-15_ARC1_Arkote"
+    rv = client.get(f'/emaitzak/{emaitza_id}')
+    assert rv.status_code == 200
+    emaitzak = rv.json()
+    assert emaitzak['estropada_data'] == "2019-06-15T12:00:00"
+    assert emaitzak['estropada_id'] == "2019-06-15_ARC1_III.-FEGEMU-BANDERA"
+    assert emaitzak['estropada_izena'] == "III. FEGEMU BANDERA"
+    assert emaitzak['denbora'] == "20:26,92"
+    assert emaitzak['kalea'] == 3
+    assert emaitzak['liga'] == "ARC1"
+    assert emaitzak['posizioa'] == 4
+    assert emaitzak['puntuazioa'] == 9
+    assert emaitzak['talde_izen_normalizatua'] == "Arkote"
+    assert emaitzak['talde_izena'] == "ARKOTE HELVETIA"
+    assert emaitzak['tanda_postua'] == 4
+    assert emaitzak['tanda'] == 1
+    assert emaitzak['ziabogak'] == ["2:14", "7:32", "12:31"]
+
 
 def test_emaitzak_by_criteria():
     query = {

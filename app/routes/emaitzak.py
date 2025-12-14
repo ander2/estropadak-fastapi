@@ -2,7 +2,6 @@ import logging
 import json
 
 from json.decoder import JSONDecodeError
-from typing import Any
 from app.config import PAGE_SIZE, JWT_SECRET_KEY
 from fastapi import APIRouter, HTTPException, Security, status
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
@@ -20,7 +19,7 @@ router = APIRouter(
 )
 
 @router.get("", response_model=EmaitzakList)
-def get_emaitzak(criteria: str = '', page: int = 0, count: int = PAGE_SIZE):
+def get_emaitzak(criteria: str = '', page: int = 0, count: int = PAGE_SIZE) -> EmaitzakList:
     try:
         criteria = json.loads(criteria)
     except JSONDecodeError:
@@ -36,33 +35,33 @@ def get_emaitzak(criteria: str = '', page: int = 0, count: int = PAGE_SIZE):
 def post_emaitza(
     emaitza: Emaitza,
     credentials: JwtAuthorizationCredentials = Security(access_security),
-):
+) -> dict:
     doc_created = EmaitzakLogic.create_emaitza(emaitza.model_dump())
     if doc_created:
-        return {}, 201
+        return {}
     else:
-        return {}, 400
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
 @router.put("/{emaitza_id}")
 def put_emaitza(
     emaitza_id: str,
     emaitza: Emaitza,
     credentials: JwtAuthorizationCredentials = Security(access_security),
-):
-    doc_updated = EmaitzakLogic.update_emaitza(emaitza_id, emaitza.model_dump())
+)->dict:
+    doc_updated = EmaitzakLogic.update_emaitza(emaitza_id, emaitza)
     if doc_updated:
-        return {}, 200
+        return {}
     else:
-        return {}, 400
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
-@router.get("/{emaitza_id}")
-def get_emaitza(emaitza_id: str) -> Any:
+@router.get("/{emaitza_id}", response_model=Emaitza)
+def get_emaitza(emaitza_id: str) -> Emaitza:
 
     emaitza = emaitzak.get_emaitza_by_id(emaitza_id)
     if emaitza:
         return emaitza
     else:
-        return {}, 404
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
 @router.delete("/{emaitza_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(emaitza_id: str):
