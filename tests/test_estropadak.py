@@ -167,6 +167,36 @@ def test_estropada():
     assert len(estropada["sailkapena"]) == 12
 
 
+def test_estropada_two_rounds():
+    rv = client.get('/estropadak/2017-08-20_ACT_XL.-Zarauzko-Estropadak')
+    assert rv.status_code == 200
+    estropada = rv.json()
+    assert estropada["bi_jardunaldiko_bandera"]
+    assert estropada["jardunaldia"] == 2
+    assert estropada["related_estropada"] == "2017-08-19_ACT_XL.-Zarauzko-Estropadak"
+    assert len(estropada["bi_eguneko_sailkapena"]) == 12
+    assert estropada["bi_eguneko_sailkapena"][8] == {
+        "talde_izena": "Tirán Pereira",
+        "lehen_jardunaldiko_denbora": "21:49,88",
+        "bigarren_jardunaldiko_denbora": "20:56,54",
+        "denbora_batura": "42:46,42",
+        "posizioa": 9
+    }
+
+
+def test_estropada_two_rounds_with_excluded_team():
+    rv = client.get('/estropadak/2018-07-07_ACT_II-Bandeira-Cidade-da-Coruña-J1')
+    assert rv.status_code == 200
+    estropada = rv.json()
+    assert estropada["bi_jardunaldiko_bandera"]
+    assert estropada["bi_eguneko_sailkapena"][11] == {
+        "talde_izena": "San Pedro",
+        "lehen_jardunaldiko_denbora": "Excl",
+        "bigarren_jardunaldiko_denbora": "22:05,28",
+        "denbora_batura": "Excl.",
+        "posizioa": 12
+    }
+
 def test_estropada_not_found():
     rv = client.get('/estropadak/fuck')
     assert rv.status_code == 404

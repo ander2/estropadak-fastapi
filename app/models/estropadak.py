@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from .emaitzak import EmbedEmaitza
+from .emaitzak import EmbedEmaitza, EmaitzaBateratua
 from .estropada_type import EstropadaTypeEnum
 
 # class EstropadaTypeEnum(str, Enum):
@@ -24,7 +24,7 @@ class Estropada(BaseModel):
     sailkapena: list[EmbedEmaitza] = []
     bi_jardunaldiko_bandera: bool = False
     jardunaldia: int = 1
-    bi_eguneko_sailkapena: list = []
+    bi_eguneko_sailkapena: list[EmaitzaBateratua] = []
     related_estropada: str | None = None
     urla: str | None = None
     puntuagarria: bool =True
