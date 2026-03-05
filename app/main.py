@@ -3,7 +3,7 @@ import json
 import logging
 import urllib
 
-from fastapi import FastAPI, status
+from fastapi import FastAPI, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -69,7 +69,7 @@ async def auth(login: Login):
             access_token = access_security.create_access_token(subject=subject)
             return {"access_token": access_token}
     else:
-        return {}
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
 @api.get('/active_year')
 async def active_year_get() -> int:
