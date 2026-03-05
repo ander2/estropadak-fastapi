@@ -19,7 +19,7 @@ class Estropada(BaseModel):
     rev: str = Field(default=None, alias="_rev")
     izena: str
     data: datetime
-    lekua: str = None
+    lekua: str = ''
     liga: EstropadaTypeEnum
     sailkapena: list[EmbedEmaitza] = []
     bi_jardunaldiko_bandera: bool = False

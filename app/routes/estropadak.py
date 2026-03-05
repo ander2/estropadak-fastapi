@@ -33,8 +33,13 @@ async def get_estropadak(year: int | None = None,
         kwargs["count"] = count
     if page is not None:
         kwargs["page"] = page
-    estropadak_ = estropadak.get_estropadak(**kwargs)
-    return estropadak_
+    try:
+        estropadak_ = estropadak.get_estropadak(**kwargs)
+        return estropadak_
+    except Exception as e:
+        msg = "Error listing estropadak: %s"
+        logger.exception(msg, e, exc_info=True)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model_by_alias=False)

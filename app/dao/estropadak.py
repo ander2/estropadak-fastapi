@@ -47,48 +47,45 @@ def get_estropadak_by_league_year(league=None, year=None, page=0, count=PAGE_SIZ
         end = ["{}z".format(league)]
 
     with get_db_connection() as database:
-        try:
-            logger.debug(f"Querying DB {start}-{end}")
-            response = database.post_view(
+        logger.debug(f"Querying DB {start}-{end}")
+        response = database.post_view(
+            config["DBNAME"],
+            "estropadak",
+            "all",
+            start_key=start,
+            end_key=end,
+            reduce=True,
+        )
+        res = response.get_result()
+        rows = res['rows']
+        logger.debug(rows)
+        result = []
+        if len(rows) > 0:
+            doc_count = rows[0]['value']
+        else:
+            doc_count = 0
+        if doc_count > 0:
+            estropadak = database.post_view(
                 config["DBNAME"],
                 "estropadak",
                 "all",
                 start_key=start,
                 end_key=end,
-                reduce=True,
-            )
-            res = response.get_result()
-            rows = res['rows']
-            logger.debug(rows)
-            result = []
-            if len(rows) > 0:
-                doc_count = rows[0]['value']
-            else:
-                doc_count = 0
-            if doc_count > 0:
-                estropadak = database.post_view(
-                    config["DBNAME"],
-                    "estropadak",
-                    "all",
-                    start_key=start,
-                    end_key=end,
-                    include_docs=True,
-                    reduce=False,
-                    skip=count * page,
-                    limit=count)
-                res = estropadak.get_result()
-                for row in res['rows']:
-                    estropada = Estropada(**row['doc'])
-                    if estropada.liga == 'euskotren':
-                        estropada.liga = estropada.liga.upper()
-                    result.append(estropada)
+                include_docs=True,
+                reduce=False,
+                skip=count * page,
+                limit=count)
+            res = estropadak.get_result()
+            for row in res['rows']:
+                estropada = Estropada(**row['doc'])
+                if estropada.liga == 'euskotren':
+                    estropada.liga = estropada.liga.upper()
+                result.append(estropada)
 
-            return {
-                'total': doc_count,
-                'docs': result
-            }
-        except KeyError:
-            return {'error': 'Estropadak not found'}, 404
+        return {
+            'total': doc_count,
+            'docs': result
+        }
 
 
 def get_estropadak_by_year(year, page=0, count=20) -> EstropadakList:
@@ -128,7 +125,9 @@ def get_estropadak_by_year(year, page=0, count=20) -> EstropadakList:
                     if estropada.liga == 'euskotren':
                         estropada.liga = estropada.liga.upper()
                     result.append(estropada)
-        except KeyError:
+        except KeyError as e:
+            msg = "Error listing estropadak by year: %s"
+            logger.exception(msg, e, exc_info=True)
             return {'error': 'Estropadak not found'}, 404
         return {
             'total': doc_count,
