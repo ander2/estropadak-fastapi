@@ -1,5 +1,6 @@
 import logging
 
+from app.common.errors import NotFoundError
 from app.config import PAGE_SIZE, JWT_SECRET_KEY
 from fastapi import APIRouter, HTTPException, Security, status
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
@@ -62,10 +63,10 @@ async def post_estropada(
 
 @router.get("/{doc_id}", response_model_by_alias=False)
 async def get_estropada(doc_id: str) -> Estropada:
-    estropada = EstropadakLogic.get_estropada(doc_id)
-    if not estropada:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    logger.info(estropada)
+    try:
+        estropada = EstropadakLogic.get_estropada(doc_id)
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     return estropada
 
 

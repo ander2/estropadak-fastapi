@@ -38,9 +38,9 @@ class EstropadakLogic():
         return estropadak.update_estropada_into_db(estropada_id, estropada)
 
     @staticmethod
-    def get_estropada(estropada_id) -> Estropada | None:
+    def get_estropada(estropada_id) -> Estropada:
         estropada = estropadak.get_estropada_by_id(estropada_id)
-        if estropada and estropada.bi_jardunaldiko_bandera:
+        if estropada.bi_jardunaldiko_bandera:
             estropada.bi_eguneko_sailkapena = []
             estropada_bi = estropadak.get_estropada_by_id(estropada.related_estropada)
             if (len(estropada.sailkapena) > 0 and
@@ -75,10 +75,7 @@ class EstropadakLogic():
                         key=lambda x: x.denbora_batura)
                     for ind, item in enumerate(estropada.bi_eguneko_sailkapena):
                         item.posizioa = ind + 1
-        if estropada:
-            return Estropada(**estropada.model_dump(by_alias=True))
-        else:
-            return None
+        return Estropada(**estropada.model_dump(by_alias=True))
 
     def _validate_league_year(self, league: str, year: int) -> bool:
         if not league and not year:

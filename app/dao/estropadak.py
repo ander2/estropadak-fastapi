@@ -2,6 +2,8 @@ import logging
 
 from ibm_cloud_sdk_core import ApiException
 
+from app.common.errors import NotFoundError
+
 from .db_connection import get_db_connection
 from ..models.estropadak import Estropada, EstropadakList
 from app.config import DEFAULT_LOGGER, PAGE_SIZE, config
@@ -17,12 +19,10 @@ def get_estropada_by_id(id) -> Estropada:
             estropada['data'] = estropada['data'].replace(' ', 'T')
             if estropada['liga'] == 'euskotren':
                 estropada['liga'] = estropada['liga'].upper()
-        except TypeError:
-            logging.error("Not found", exc_info=1)
-            return None
         except ApiException:
-            logging.info(f"Estropada document with id {id} not found")
-            return None
+            msg = f"Estropada document with id {id} not found"
+            logging.info(msg)
+            raise NotFoundError(msg)
         return Estropada(**estropada)
 
 
