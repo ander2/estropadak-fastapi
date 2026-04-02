@@ -30,6 +30,13 @@ def test_sailkapena_with_lowercase_league():
     # assert sailkapena['total'] == 1
     # assert len(sailkapena['docs'][0]['stats']) == 12
 
+def test_sailkapena_for_invalid_year():
+    rv = client.get('/sailkapenak?league=act&year=1017')
+    assert rv.status_code == 400
+
+def test_sailkapena_with_only_year():
+    rv = client.get('/sailkapenak?year=2017')
+    assert rv.status_code == 400
 
 def test_sailkapena_with_uppercase_league():
     rv = client.get('/sailkapenak?league=ACT&year=2017')
@@ -111,6 +118,9 @@ def test_get_sailkapena_for_id():
     assert sailkapena['league'] == 'ACT'
     assert len(sailkapena['stats']) == 12
 
+def test_get_sailkapena_for_id_not_found():
+    rv = client.get('/sailkapenak/rankoooooo_ACT_2019')
+    assert rv.status_code == 404
 
 def test_put_sailkapena_for_id_without_credentials():
     rv = client.get('/sailkapenak/rank_ACT_2019')
@@ -159,6 +169,19 @@ def test_put_sailkapena_for_id_with_credentials(credentials):
     assert rv.status_code == 200
 
 
+def test_put_sailkapena_for_non_existing_id_with_credentials(credentials):
+    rv = client.get('/sailkapenak/rank_ACT_2019')
+    sailkapena = rv.json()
+
+    rv = client.post('/auth', json=credentials)
+    token = rv.json()['access_token']
+    rv = client.put(
+        '/sailkapenak/rankoooooooooo_ACT_2019',
+        json=sailkapena,
+        headers=[('Authorization', f'Bearer {token}')])
+    assert rv.status_code == 404
+
+
 def test_delete_sailkapena_for_id_without_credentials():
     rv = client.delete('/sailkapenak/rank_ACT_2019')
     assert rv.status_code == 401
@@ -180,5 +203,19 @@ def test_delete_sailkapena_for_id_with_credentials(credentials):
     logging.info(rv.json())
     rv = client.delete(
         '/sailkapenak/rank_ACT_2100',
+        headers=[('Authorization', f'Bearer {token}')])
+    assert rv.status_code == 204
+
+
+def test_delete_sailkapena_for_non_existant_id_with_credentials(credentials):
+    sailkapena = {
+        'league': 'ACT',
+        'year': 2100,
+        'stats': []
+    }
+    rv = client.post('/auth', json=credentials)
+    token = rv.json()['access_token']
+    rv = client.delete(
+        '/sailkapenak/rankoooooooo_ACT_2100',
         headers=[('Authorization', f'Bearer {token}')])
     assert rv.status_code == 204

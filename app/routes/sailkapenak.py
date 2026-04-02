@@ -1,6 +1,8 @@
 import logging
+from datetime import datetime
 from typing import Any, Annotated
 
+from app.common.errors import NotFoundError
 from app.config import JWT_SECRET_KEY
 from fastapi import APIRouter, HTTPException, Security, status, Query
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
@@ -21,6 +23,7 @@ from ..dao.sailkapenak import (
 access_security = JwtAccessBearer(secret_key=JWT_SECRET_KEY, auto_error=True)
 
 MIN_YEAR = 2003
+CURRENT_YEAR = datetime.now().year
 router = APIRouter(
     prefix="/sailkapenak",
     tags=["sailkapenak"],
@@ -31,18 +34,19 @@ router = APIRouter(
 @router.get("", response_model=SailkapenakList)
 async def get_sailkapenak(
     league: EstropadaTypeEnum | None = None,
-    year: int | None = None,
+    year: int | None = Query(None, ge=MIN_YEAR, le=CURRENT_YEAR),
     teams: Annotated[list[str] | None, Query()] = None,
     category=None
 ) -> SailkapenakList:
     stats = None
-    if year is None:
+    if not year:
         stats = get_sailkapena_by_league(league)
+    elif not league:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You need to provide a league with a year")
     else:
-        if year and year < MIN_YEAR:
-            return "Year not found", 400
         stats = get_sailkapena_by_league_year(league, year, category)
-    if stats is None:
+
+    if not stats:
         return {'total': 0, 'docs': []}
 
     if teams:
@@ -66,11 +70,11 @@ async def get_sailkapenak(
 
 @router.get("/{sailkapena_id}", response_model=Sailkapena)
 async def get_sailkapena(sailkapena_id: str) -> Sailkapena:
-    sailkapena = get_sailkapena_logic(sailkapena_id)
-    if sailkapena:
+    try:
+        sailkapena = get_sailkapena_logic(sailkapena_id)
         return sailkapena
-    else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
 @router.put("/{sailkapena_id}", response_model=Sailkapena)
@@ -78,7 +82,11 @@ async def put_sailkapena(sailkapena_id: str,
                          sailkapena: Sailkapena,
                          credentials: JwtAuthorizationCredentials = Security(access_security),
                          ) -> Sailkapena:
-    return update_sailkapena_logic(sailkapena_id, sailkapena)
+    try:
+        _ = get_sailkapena_logic(sailkapena_id)
+        return update_sailkapena_logic(sailkapena_id, sailkapena)
+    except NotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 
 @router.delete("/{sailkapena_id}", status_code=status.HTTP_204_NO_CONTENT)

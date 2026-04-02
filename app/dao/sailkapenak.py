@@ -2,6 +2,8 @@ import logging
 
 from ibm_cloud_sdk_core import ApiException
 
+from app.common.errors import NotFoundError
+
 from .db_connection import get_db_connection
 from app.config import config, DEFAULT_LOGGER
 
@@ -75,8 +77,8 @@ def get_sailkapena_by_id(id: str):
             res = database.get_document(config["DBNAME"], id)
             doc = res.get_result()
             return doc
-        except KeyError:
-            return None  # {'error': 'Sailkapena not found'}, 404
+        except ApiException:
+            raise NotFoundError(f"Sailkapena {id} not found")
 
 
 def get_sailkapenak_by_teams(league: str, year: int, teams: list[str]):
