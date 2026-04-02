@@ -9,17 +9,6 @@ from .db_connection import get_db_connection
 logger = logging.getLogger(DEFAULT_LOGGER)
 
 
-def get_taldea_by_id(id):
-    with get_db_connection() as database:
-        try:
-            res = database.get_document(config["DBNAME"], id)
-            taldea = res.get_result()
-        except ApiException as e:
-            logger.error(f"Taldea document with id {id} not found: {e}")
-            taldea = None
-        return taldea
-
-
 def get_taldeak(league, year=None, category=None):
     league = league.upper()
 
