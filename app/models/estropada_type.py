@@ -15,3 +15,11 @@ class EstropadaTypeEnum(StrEnum):
     GTL = 'GTL'
     TXAPELKETAK = 'TXAPELKETAK'
 
+
+class LigaWithStaff(StrEnum):
+    ACT = 'ACT'
+    ARC1 = 'ARC1'
+    ARC2 = 'ARC2'
+    ETE = 'ETE'
+    EUSKOTREN = 'EUSKOTREN'
+    euskotren = 'euskotren'

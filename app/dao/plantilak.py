@@ -1,14 +1,18 @@
 import logging
 
 from .db_connection import get_db_connection
+from app.common.errors import NotFoundError
+from app.config import config
 
 
 def get_plantila(team, league, year):
     with get_db_connection() as database:
         try:
-            id = f'team_{league}_{year}_{team}'
-            taldea = database[id]
-            talde_izenak = database['talde_izenak']
+            id = f'team_{league}_{year}_{team.capitalize()}'
+            res = database.get_document(config["DBNAME"], id)
+            taldea = res.get_result()
+            res_talde_izenak = database.get_document(config["DBNAME"], 'talde_izenak')
+            talde_izenak = res_talde_izenak.get_result()
             talde_izenak = {k.lower(): v for k, v in talde_izenak.items()}
             _rowers = []
             for i, rower in enumerate(taldea['rowers']):
@@ -26,10 +30,7 @@ def get_plantila(team, league, year):
                 _rowers.append(rower)
             taldea['rowers'] = _rowers
 
-        except TypeError:
+        except (TypeError, KeyError):
             logging.info("Not found", exc_info=1)
-            taldea = None
-        except KeyError:
-            logging.info("Not found", exc_info=1)
-            taldea = None
+            raise NotFoundError("Not found")
         return taldea

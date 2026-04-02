@@ -1,7 +1,7 @@
 
 from fastapi import APIRouter, HTTPException, status
 
-from app.models.estropadak import EstropadaTypeEnum
+from app.models.estropada_type import EstropadaTypeEnum, LigaWithStaff
 from app.dao import taldeak
 from app.dao import plantilak
 
@@ -24,12 +24,10 @@ def get_taldeak(league: EstropadaTypeEnum, year: int | None = None, category: st
 
 
 @router.get('/{team_id}')
-def get_taldea(self, team_id: str, year: int, league: EstropadaTypeEnum):
-    leagues = ['ACT', 'ARC1', 'ARC2', 'ETE', 'EUSKOTREN']
-    league = league.upper()
-    if league not in leagues:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, 'Not valid league')
-    team = plantilak.get_plantila(team_id, league, year)
-    if team is None:
-        return {'message': 'Team not found'}, 404
+def get_taldea(team_id: str, year: int, league: LigaWithStaff):
+    try:
+        team = plantilak.get_plantila(team_id, league, year)
+    except Exception:
+        msg = f"Team {team_id} on {league=} and {year=} not found"
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg)
     return team

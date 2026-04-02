@@ -6,13 +6,6 @@ from pydantic import BaseModel, Field
 from .emaitzak import EmbedEmaitza, EmaitzaBateratua
 from .estropada_type import EstropadaTypeEnum
 
-# class EstropadaTypeEnum(str, Enum):
-#     ACT = 'ACT'
-#     ARC1 = 'ARC1'
-#     ARC2 = 'ARC2'
-#     ETE = 'ETE'
-#     EUSKOTREN = 'EUSKOTREN'
-#     KONTXA = 'KONTXA'
 
 class Estropada(BaseModel):
     id: str = Field(default=None, alias="_id")
