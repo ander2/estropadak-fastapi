@@ -2,6 +2,7 @@ import logging
 import json
 
 from json.decoder import JSONDecodeError
+from app.common.errors import NotFoundError
 from app.config import PAGE_SIZE, JWT_SECRET_KEY
 from fastapi import APIRouter, HTTPException, Security, status
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
@@ -56,15 +57,14 @@ def put_emaitza(
 
 @router.get("/{emaitza_id}", response_model=Emaitza)
 def get_emaitza(emaitza_id: str) -> Emaitza:
-
-    emaitza = emaitzak.get_emaitza_by_id(emaitza_id)
-    if emaitza:
+    try:
+        emaitza = emaitzak.get_emaitza_by_id(emaitza_id)
         return emaitza
-    else:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+    except NotFoundError as e:
+        raise HTTPException(code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 @router.delete("/{emaitza_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete(emaitza_id: str):
     emaitza = emaitzak.delete_emaitza_from_db(emaitza_id)
     if not emaitza:
-        return {"msg": "Cannot delete document"}, 401
+        raise HTTPException(code=status.HTTP_403_FORBIDDEN, detail="Cannot delete document")

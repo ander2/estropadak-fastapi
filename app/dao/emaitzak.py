@@ -4,18 +4,21 @@ from ibm_cloud_sdk_core import ApiException
 
 from ..dao.db_connection import get_db_connection
 from ..models.emaitzak import Emaitza
+from app.common.errors import NotFoundError
 from app.config import config, DEFAULT_LOGGER
 
 logger = logging.getLogger(DEFAULT_LOGGER)
 
 
-def get_emaitza_by_id(id) -> Emaitza | None:
+def get_emaitza_by_id(id) -> Emaitza:
     with get_db_connection() as database:
         try:
             res = database.get_document(config["DBNAME"], id)
             emaitza = res.get_result()
         except KeyError:
-            emaitza = None
+            msg = f"Emaitza document with id {id} not found"
+            logging.info(msg)
+            raise NotFoundError(msg)
         return emaitza
 
 
