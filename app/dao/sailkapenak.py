@@ -11,7 +11,7 @@ from app.config import config, DEFAULT_LOGGER
 logger = logging.getLogger(DEFAULT_LOGGER)
 
 
-def get_sailkapena_by_league_year(league, year, category):
+def get_sailkapena_by_league_year(league, year, category) -> dict:
     with get_db_connection() as database:
         if league in ['gbl', 'bbl', 'btl', 'gtl']:
             _category = category.replace(' ', '_').lower()
@@ -22,7 +22,7 @@ def get_sailkapena_by_league_year(league, year, category):
             res = database.get_document(config["DBNAME"], key)
             doc = res.get_result()
         except ApiException:
-            return None
+            raise NotFoundError
         result = {
             'total': 1,
             'docs': [doc]
@@ -71,7 +71,7 @@ def get_sailkapena_by_league(league):
         }
 
 
-def get_sailkapena_by_id(id: str):
+def get_sailkapena_by_id(id: str) -> dict:
     with get_db_connection() as database:
         try:
             res = database.get_document(config["DBNAME"], id)
@@ -81,7 +81,7 @@ def get_sailkapena_by_id(id: str):
             raise NotFoundError(f"Sailkapena {id} not found")
 
 
-def get_sailkapenak_by_teams(league: str, year: int, teams: list[str]):
+def get_sailkapenak_by_teams(league: str, year: int, teams: list[str]) -> dict:
     with get_db_connection() as database:
         try:
             doc_count = 0
@@ -149,7 +149,7 @@ def get_sailkapenak_by_teams(league: str, year: int, teams: list[str]):
                 'docs': result
             }
         except KeyError:
-            return None  # {'error': 'Sailkapena not found'}, 404
+            raise NotFoundError()
 
 
 def insert_sailkapena_into_db(sailkapena):

@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from typing import Any, Annotated
+from typing import Annotated
 
 from app.common.errors import NotFoundError
 from app.config import JWT_SECRET_KEY
@@ -44,13 +44,16 @@ async def get_sailkapenak(
     elif not league:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You need to provide a league with a year")
     else:
-        stats = get_sailkapena_by_league_year(league, year, category)
-
-    if not stats:
-        return {'total': 0, 'docs': []}
+        try:
+            stats = get_sailkapena_by_league_year(league, year, category)
+        except NotFoundError:
+            return {'total': 0, 'docs': []}
 
     if teams:
-        team_stats = get_sailkapenak_by_teams(league.name, year, teams)
+        try:
+            team_stats = get_sailkapenak_by_teams(league.name, year, teams)
+        except NotFoundError:
+            team_stats = {'total': 0, 'docs': []}
         return team_stats
     else:
         res = []
