@@ -208,11 +208,6 @@ def test_delete_sailkapena_for_id_with_credentials(credentials):
 
 
 def test_delete_sailkapena_for_non_existant_id_with_credentials(credentials):
-    sailkapena = {
-        'league': 'ACT',
-        'year': 2100,
-        'stats': []
-    }
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
     rv = client.delete(

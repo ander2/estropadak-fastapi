@@ -40,7 +40,9 @@ def test_years_put_protected_endpoint_without_credentials():
 def test_years_put_protected_endpoint(credentials):
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
-    rv = client.put('/years/ACT', json={'urteak': list(range(2003, 2022))}, headers=[('Authorization', f'Bearer {token}')])
+    rv = client.put('/years/ACT',
+                    json={'urteak': list(range(2003, 2022))},
+                    headers=[('Authorization', f'Bearer {token}')])
     assert rv.status_code == 200
 
 
@@ -48,9 +50,13 @@ def test_years_put_bad_params(credentials):
     rv = client.post('/auth', json=credentials)
     token = rv.json()['access_token']
     # Bad param name
-    rv = client.put('/years/ACT', json={'urte': list(range(2003, 2022))}, headers=[('Authorization', f'Bearer {token}')])
+    rv = client.put('/years/ACT',
+                    json={'urte': list(range(2003, 2022))},
+                    headers=[('Authorization', f'Bearer {token}')])
     assert rv.status_code == 400
 
     # Bad values
-    rv = client.put('/years/ACT', json={'urteak': list('abc')}, headers=[('Authorization', f'Bearer {token}')])
+    rv = client.put('/years/ACT',
+                    json={'urteak': list('abc')},
+                    headers=[('Authorization', f'Bearer {token}')])
     assert rv.status_code == 400
