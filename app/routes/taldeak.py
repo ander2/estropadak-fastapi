@@ -1,4 +1,4 @@
-
+import asyncio
 from fastapi import APIRouter, HTTPException, status
 
 from app.models.estropada_type import EstropadaTypeEnum, LigaWithStaff
@@ -14,19 +14,19 @@ router = APIRouter(
 
 
 @router.get('')
-def get_taldeak(league: EstropadaTypeEnum, year: int | None = None, category: str | None = None):
+async def get_taldeak(league: EstropadaTypeEnum, year: int | None = None, category: str | None = None):
     teams = []
     categorised_leagues = (EstropadaTypeEnum.GBL, EstropadaTypeEnum.GTL, EstropadaTypeEnum.BBL, EstropadaTypeEnum.BTL)
     if league.upper() not in categorised_leagues:
         category = None
-    teams = taldeak.get_taldeak(league, year, category)
+    teams = await asyncio.to_thread(taldeak.get_taldeak, league, year, category)
     return teams
 
 
 @router.get('/{team_id}')
-def get_taldea(team_id: str, year: int, league: LigaWithStaff):
+async def get_taldea(team_id: str, year: int, league: LigaWithStaff):
     try:
-        team = plantilak.get_plantila(team_id, league, year)
+        team = await asyncio.to_thread(plantilak.get_plantila, team_id, league, year)
     except Exception:
         msg = f"Team {team_id} on {league=} and {year=} not found"
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=msg)

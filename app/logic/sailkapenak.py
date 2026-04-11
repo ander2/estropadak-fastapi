@@ -1,3 +1,5 @@
+import asyncio
+
 from ..dao.sailkapenak import get_sailkapena_by_id, insert_sailkapena_into_db, update_sailkapena_into_db
 from ..models.sailkapenak import Sailkapena
 
@@ -32,20 +34,20 @@ def _decode_sailkapena(sailkapena: dict) -> Sailkapena:
     return Sailkapena(**result)
 
 
-def create_sailkapena(sailkapena: Sailkapena):
+async def create_sailkapena(sailkapena: Sailkapena):
     sailkapena_ = _encode_sailkapena(sailkapena)
-    insert_sailkapena_into_db(sailkapena_)
-    sailk = get_sailkapena(sailkapena_['_id'])
+    await asyncio.to_thread(insert_sailkapena_into_db, sailkapena_)
+    sailk = await get_sailkapena(sailkapena_['_id'])
     return sailk
 
 
-def get_sailkapena(sailkapena_id: str) -> Sailkapena:
-    sailkapena = get_sailkapena_by_id(sailkapena_id)
+async def get_sailkapena(sailkapena_id: str) -> Sailkapena:
+    sailkapena = await asyncio.to_thread(get_sailkapena_by_id, sailkapena_id)
     sailkapena_ = _decode_sailkapena(sailkapena)
     return sailkapena_
 
 
-def update_sailkapena(sailkapena_id: str, sailkapena: Sailkapena) -> Sailkapena:
+async def update_sailkapena(sailkapena_id: str, sailkapena: Sailkapena) -> Sailkapena:
     sailkapena_ = sailkapena.model_dump()
     stats = sailkapena_['stats']
     del sailkapena_['stats']
@@ -53,7 +55,7 @@ def update_sailkapena(sailkapena_id: str, sailkapena: Sailkapena) -> Sailkapena:
     for stat in stats:
         team_name = stat['name']
         sailkapena_['stats'][team_name] = stat['value']
-    res = update_sailkapena_into_db(sailkapena_id, sailkapena_)
+    res = await asyncio.to_thread(update_sailkapena_into_db, sailkapena_id, sailkapena_)
     _, league, year = sailkapena_id.split('_')
     result = {
         'id': res['_id'],

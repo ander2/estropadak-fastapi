@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import logging
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(DEFAULT_LOGGER)
 class EstropadakLogic():
 
     @staticmethod
-    def create_estropada(estropada: Estropada) -> Estropada:
+    async def create_estropada(estropada: Estropada) -> Estropada:
         izena = estropada.izena.replace(' ', '-')
         id = f'{estropada.data.strftime("%Y-%m-%d")}_{estropada.liga.value}_{izena}'
         estropada_ = Estropada(
@@ -21,7 +22,7 @@ class EstropadakLogic():
             **estropada.model_dump(exclude_unset=True)
         )
 
-        new_estropada = estropadak.insert_estropada_into_db(estropada_)
+        new_estropada = await asyncio.to_thread(estropadak.insert_estropada_into_db, estropada_)
 
         logger.info(f"Generating emaitza for sailkapena: {len(estropada.sailkapena) > 0}")
         if len(estropada.sailkapena) > 0:
@@ -30,19 +31,19 @@ class EstropadakLogic():
         return Estropada(**new_estropada.model_dump(by_alias=True))
 
     @staticmethod
-    def update_estropada(estropada_id: str, estropada: Estropada):
+    async def update_estropada(estropada_id: str, estropada: Estropada):
         if estropada.liga == 'EUSKOTREN':
             estropada.liga = 'euskotren'
         for emaitza in estropada.sailkapena:
-            EmaitzakLogic.update_emaitza(emaitza.id, emaitza)
-        return estropadak.update_estropada_into_db(estropada_id, estropada)
+            await asyncio.to_thread(EmaitzakLogic.update_emaitza, emaitza.id, emaitza)
+        return await asyncio.to_thread(estropadak.update_estropada_into_db, estropada_id, estropada)
 
     @staticmethod
-    def get_estropada(estropada_id) -> Estropada:
-        estropada = estropadak.get_estropada_by_id(estropada_id)
+    async def get_estropada(estropada_id) -> Estropada:
+        estropada = await asyncio.to_thread(estropadak.get_estropada_by_id, estropada_id)
         if estropada.bi_jardunaldiko_bandera:
             estropada.bi_eguneko_sailkapena = []
-            estropada_bi = estropadak.get_estropada_by_id(estropada.related_estropada)
+            estropada_bi = await asyncio.to_thread(estropadak.get_estropada_by_id, estropada.related_estropada)
             if (len(estropada.sailkapena) > 0 and
                 len(estropada_bi.sailkapena) > 0):
                 if estropada.jardunaldia == 1:
@@ -87,5 +88,5 @@ class EstropadakLogic():
             return False
 
     @staticmethod
-    def delete_estropada(estropada_id):
-        estropadak.delete_estropada_from_db(estropada_id)
+    async def delete_estropada(estropada_id):
+        await asyncio.to_thread(estropadak.delete_estropada_from_db, estropada_id)

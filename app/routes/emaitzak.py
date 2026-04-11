@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import json
 
@@ -20,51 +21,51 @@ router = APIRouter(
 )
 
 @router.get("", response_model=EmaitzakList)
-def get_emaitzak(criteria: str = '', page: int = 0, count: int = PAGE_SIZE) -> EmaitzakList:
+async def get_emaitzak(criteria: str = '', page: int = 0, count: int = PAGE_SIZE) -> EmaitzakList:
     try:
         criteria = json.loads(criteria)
     except JSONDecodeError:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Bad criteria, please check the query")
     try:
-        docs, total = emaitzak.get_emaitzak(criteria, page, count)
+        docs, total = await asyncio.to_thread(emaitzak.get_emaitzak, criteria, page, count)
         return {"docs": docs, "total": total}
     except Exception:
         logging.info("Error", exc_info=1)
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Estropadak not found")
 
 @router.post("", status_code=201)
-def post_emaitza(
+async def post_emaitza(
     emaitza: Emaitza,
     credentials: JwtAuthorizationCredentials = Security(access_security),
 ) -> dict:
-    doc_created = EmaitzakLogic.create_emaitza(emaitza.model_dump())
+    doc_created = await EmaitzakLogic.create_emaitza(emaitza.model_dump())
     if doc_created:
         return {}
     else:
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
 @router.put("/{emaitza_id}")
-def put_emaitza(
+async def put_emaitza(
     emaitza_id: str,
     emaitza: Emaitza,
     credentials: JwtAuthorizationCredentials = Security(access_security),
 )->dict:
-    doc_updated = EmaitzakLogic.update_emaitza(emaitza_id, emaitza)
+    doc_updated = await EmaitzakLogic.update_emaitza(emaitza_id, emaitza)
     if doc_updated:
         return {}
     else:
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
 @router.get("/{emaitza_id}", response_model=Emaitza)
-def get_emaitza(emaitza_id: str) -> Emaitza:
+async def get_emaitza(emaitza_id: str) -> Emaitza:
     try:
-        emaitza = emaitzak.get_emaitza_by_id(emaitza_id)
+        emaitza = await asyncio.to_thread(emaitzak.get_emaitza_by_id, emaitza_id)
         return emaitza
     except NotFoundError as e:
         raise HTTPException(code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 @router.delete("/{emaitza_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete(emaitza_id: str):
-    emaitza = emaitzak.delete_emaitza_from_db(emaitza_id)
+async def delete(emaitza_id: str):
+    emaitza = await asyncio.to_thread(emaitzak.delete_emaitza_from_db, emaitza_id)
     if not emaitza:
         raise HTTPException(code=status.HTTP_403_FORBIDDEN, detail="Cannot delete document")

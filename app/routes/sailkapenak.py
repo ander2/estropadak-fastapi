@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from datetime import datetime
 from typing import Annotated
@@ -40,18 +41,17 @@ async def get_sailkapenak(
 ) -> SailkapenakList:
     stats = None
     if not year:
-        stats = get_sailkapena_by_league(league)
+        stats = await asyncio.to_thread(get_sailkapena_by_league, league.value)
     elif not league:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You need to provide a league with a year")
     else:
         try:
-            stats = get_sailkapena_by_league_year(league, year, category)
+            stats = await asyncio.to_thread(get_sailkapena_by_league_year, league, year, category)
         except NotFoundError:
             return {'total': 0, 'docs': []}
-
     if teams:
         try:
-            team_stats = get_sailkapenak_by_teams(league.name, year, teams)
+            team_stats = await asyncio.to_thread(get_sailkapenak_by_teams, league.name, year, teams)
         except NotFoundError:
             team_stats = {'total': 0, 'docs': []}
         return team_stats
@@ -74,7 +74,7 @@ async def get_sailkapenak(
 @router.get("/{sailkapena_id}", response_model=Sailkapena)
 async def get_sailkapena(sailkapena_id: str) -> Sailkapena:
     try:
-        sailkapena = get_sailkapena_logic(sailkapena_id)
+        sailkapena = await get_sailkapena_logic(sailkapena_id)
         return sailkapena
     except NotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
@@ -86,8 +86,8 @@ async def put_sailkapena(sailkapena_id: str,
                          credentials: JwtAuthorizationCredentials = Security(access_security),
                          ) -> Sailkapena:
     try:
-        _ = get_sailkapena_logic(sailkapena_id)
-        return update_sailkapena_logic(sailkapena_id, sailkapena)
+        _ = await get_sailkapena_logic(sailkapena_id)
+        return await update_sailkapena_logic(sailkapena_id, sailkapena)
     except NotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
@@ -97,16 +97,16 @@ async def delete_sailkapena(
     sailkapena_id: str,
     credentials: JwtAuthorizationCredentials = Security(access_security),
 ) -> None:
-    delete_sailkapena_from_db(sailkapena_id)
+    await asyncio.to_thread(delete_sailkapena_from_db, sailkapena_id)
 
 
 @router.post("", response_model=Sailkapena, status_code=status.HTTP_201_CREATED)
-def post_sailkapenak(
+async def post_sailkapenak(
     sailkapena: Sailkapena,
     credentials: JwtAuthorizationCredentials = Security(access_security)
 ):
     try:
-        res = create_sailkapena(sailkapena)
+        res = await create_sailkapena(sailkapena)
         if res:
             return res
         else:

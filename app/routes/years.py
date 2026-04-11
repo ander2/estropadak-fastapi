@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, Security
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer
 
@@ -17,8 +18,8 @@ router = APIRouter(
 
 
 @router.get('')
-def get_all_years(historial: bool = False, year: int = 2010) -> list[Year]:
-    all_years = years.get_years_from_db()
+async def get_all_years(historial: bool = False, year: int = 2010) -> list[Year]:
+    all_years = await asyncio.to_thread(years.get_years_from_db)
     result = []
     for k, v in all_years.items():
         if k.upper() in EstropadaTypeEnum or k == 'euskotren':
@@ -37,8 +38,8 @@ def get_all_years(historial: bool = False, year: int = 2010) -> list[Year]:
 
 
 @router.get('/{league}')
-def get_years(league: EstropadaTypeEnum):
-    all_years = years.get_years_from_db()
+async def get_years(league: EstropadaTypeEnum):
+    all_years = await asyncio.to_thread(years.get_years_from_db)
     years_ = all_years.get(league.lower(), [])
     return {
         'name': league,
@@ -46,8 +47,8 @@ def get_years(league: EstropadaTypeEnum):
     }
 
 @router.put('/{league}')
-def put_years(league: EstropadaTypeEnum,
+async def put_years(league: EstropadaTypeEnum,
               data: YearPutModel,
               credentials: JwtAuthorizationCredentials = Security(access_security),
               ):
-    years.update_years_into_db(data.urteak, league.lower())
+    await asyncio.to_thread(years.update_years_into_db, data.urteak, league.lower())

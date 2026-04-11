@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from app.common.errors import NotFoundError
@@ -35,7 +36,7 @@ async def get_estropadak(year: int | None = None,
     if page is not None:
         kwargs["page"] = page
     try:
-        estropadak_ = estropadak.get_estropadak(**kwargs)
+        estropadak_ = await asyncio.to_thread(estropadak.get_estropadak, **kwargs)
         return estropadak_
     except Exception as e:
         msg = "Error listing estropadak: %s"
@@ -50,7 +51,7 @@ async def post_estropada(
 ) -> Estropada:
     data = estropada
     try:
-        estropada_ = EstropadakLogic.create_estropada(data)
+        estropada_ = await EstropadakLogic.create_estropada(data)
         if estropada_:
             logger.info(estropada_)
             return estropada_
@@ -64,7 +65,7 @@ async def post_estropada(
 @router.get("/{doc_id}", response_model_by_alias=False)
 async def get_estropada(doc_id: str) -> Estropada:
     try:
-        estropada = EstropadakLogic.get_estropada(doc_id)
+        estropada = await EstropadakLogic.get_estropada(doc_id)
     except NotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     return estropada
@@ -77,7 +78,7 @@ async def put_estropada(
     credentials: JwtAuthorizationCredentials = Security(access_security),
 ) -> dict:
     try:
-        EstropadakLogic.update_estropada(doc_id, estropada)
+        await EstropadakLogic.update_estropada(doc_id, estropada)
         return {}
     except Exception as e:
         logging.error("Error while updating estropada %s", doc_id, exc_info=1)
@@ -90,7 +91,7 @@ async def delete_estropada(
     credentials: JwtAuthorizationCredentials = Security(access_security),
 ) -> None:
     try:
-        EstropadakLogic.delete_estropada(doc_id)
+        await EstropadakLogic.delete_estropada(doc_id)
     except Exception:
         logging.error("Error while deleting estropada %s", doc_id, exc_info=1)
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
