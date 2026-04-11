@@ -1,6 +1,6 @@
 [project]
 name = "estropadak-fastapi"
-version = "0.0.9"
+version = "0.0.10"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
@@ -54,3 +54,11 @@ dev = [
 log_cli=false
 log_cli_level="INFO"
 addopts = "--cov=app --cov-report html:cov_html"
+
+[tool.ruff]
+# Allow lines to be as long as 120.
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["F401"]
