@@ -31,6 +31,7 @@ class EmbedEmaitza(BaseModel):
     tanda_postua: int
     tanda: int
     ziabogak: list[str] = []
+    kategoria: str | None = None
 
 
 class EmaitzakList(BaseModel):
