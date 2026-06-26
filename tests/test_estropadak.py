@@ -21,6 +21,8 @@ def create_estropada(credentials):
     }, headers=[('Authorization', f'Bearer {token}')])
     yield "2021-06-02_ARC1_Estropada-test4"
     client.delete('/estropadak/2021-06-02_ARC1_Estropada-test4', headers=[('Authorization', f'Bearer {token}')])
+    client.delete('/emaitzak/2021-06-02_ARC1_Arkote', headers=[('Authorization', f'Bearer {token}')])
+
 
 @pytest.fixture()
 def estropada_with_sailkapena(credentials):
@@ -358,3 +360,32 @@ def test_estropada_creation_with_sailkapena(credentials, estropada_with_sailkape
 
     rv = client.get('/emaitzak/2021-06-01_ACT_Kaiku')
     assert rv.status_code == 200
+
+def test_estropada_modification_with_sailkapena(credentials, create_estropada):
+    estropada_id = create_estropada
+    rv = client.post('/auth', json=credentials)
+    token = rv.json()['access_token']
+    rv = client.put(f'/estropadak/{estropada_id}', json={
+        "izena": "Estropada test2",
+        "data": "2021-06-02 17:30",
+        "liga": "ARC1",
+        "sailkapena": [{
+            "talde_izena": "ARKOTE",
+            "denbora": "20:14,84",
+            "puntuazioa": 5,
+            "posizioa": 8,
+            "tanda": 1,
+            "tanda_postua": 1,
+            "kalea": 1,
+            "ziabogak": [
+                "05:06",
+                "09:56",
+                "15:24"
+            ]
+        }],
+        "lekua": "Nonbait"
+    }, headers=[('Authorization', f'Bearer {token}')])
+    assert rv.status_code == 200
+    emaitza_id = '2021-06-02_ARC1_Arkote'
+    res = client.get(f'/emaitzak/{emaitza_id}')
+    assert res.status_code == 200

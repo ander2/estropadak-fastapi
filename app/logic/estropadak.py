@@ -2,10 +2,11 @@ import asyncio
 import datetime
 import logging
 
-from ..dao import estropadak, years
-from ..logic.emaitzak import EmaitzakLogic
+from ..dao import emaitzak, estropadak, years
+from ..logic.emaitzak import EmaitzakLogic, create_emaitza, get_emaitza_id
 from ..models.estropadak import Estropada
-from ..models.emaitzak import EmaitzaBateratua
+from ..models.emaitzak import Emaitza, EmaitzaBateratua
+from app.common.errors import NotFoundError
 from app.config import DEFAULT_LOGGER
 
 logger = logging.getLogger(DEFAULT_LOGGER)
@@ -34,8 +35,18 @@ class EstropadakLogic():
     async def update_estropada(estropada_id: str, estropada: Estropada):
         if estropada.liga == 'EUSKOTREN':
             estropada.liga = 'euskotren'
-        for emaitza in estropada.sailkapena:
-            await asyncio.to_thread(EmaitzakLogic.update_emaitza, emaitza.id, emaitza)
+        for new_emaitza in estropada.sailkapena:
+            emaitza_id = get_emaitza_id(estropada, new_emaitza.talde_izena)
+            try:
+                emaitza = emaitzak.get_emaitza_by_id(emaitza_id)
+                await EmaitzakLogic.update_emaitza(emaitza.id, emaitza)
+            except NotFoundError:
+                emaitza = await create_emaitza(new_emaitza,
+                                               estropada_id,
+                                               estropada.izena,
+                                               estropada.data,
+                                               estropada.liga)
+                await EmaitzakLogic.create_emaitza(emaitza.model_dump())
         return await asyncio.to_thread(estropadak.update_estropada_into_db, estropada_id, estropada)
 
     @staticmethod

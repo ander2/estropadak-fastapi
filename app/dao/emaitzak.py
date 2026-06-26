@@ -15,7 +15,7 @@ def get_emaitza_by_id(id) -> Emaitza:
         try:
             res = database.get_document(config["DBNAME"], id)
             emaitza = res.get_result()
-        except KeyError:
+        except ApiException:
             msg = f"Emaitza document with id {id} not found"
             logging.info(msg)
             raise NotFoundError(msg)

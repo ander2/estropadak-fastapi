@@ -166,7 +166,7 @@ def update_estropada_into_db(estropada_id: str, estropada: Estropada):
         if doc['liga'] == 'EUSKOTREN':
             estropada['liga'] = estropada.liga.lower()
         doc['lekua'] = estropada.lekua
-        doc['sailkapena'] = estropada.sailkapena
+        doc['sailkapena'] = [sailk.model_dump() for sailk in estropada.sailkapena]
         if hasattr(estropada, 'bi_jardunaldiko_bandera'):
             doc['bi_jardunaldiko_bandera'] = estropada.bi_jardunaldiko_bandera
         if hasattr(estropada, 'related_estropada'):

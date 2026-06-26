@@ -1,13 +1,30 @@
 import asyncio
+import logging
+from datetime import datetime
+
 from ..dao import emaitzak, taldeak
-from ..models.emaitzak import Emaitza
+from ..models.emaitzak import Emaitza, EmbedEmaitza
 from ..models.estropadak import Estropada
+from app.config import DEFAULT_LOGGER
+
+logger = logging.getLogger(DEFAULT_LOGGER)
 
 
 def get_emaitza_id(estropada: Estropada, talde_izena: str) -> str:
     talde_izena = talde_izena.replace(' ', '-')
     id = f'{estropada.data.strftime("%Y-%m-%d")}_{estropada.liga}_{talde_izena}'
     return id
+
+async def create_emaitza(new_emaitza: EmbedEmaitza, estropada_id: str, estropada_izena: str, estropada_data: datetime, liga: str) -> Emaitza:
+    talde_izen_normalizatua = await asyncio.to_thread(taldeak.get_talde_izen_normalizatua, new_emaitza.talde_izena)
+    emaitza = Emaitza(**new_emaitza.model_dump(exclude_none=True),
+                      estropada_data=estropada_data,
+                      estropada_id=estropada_id,
+                      estropada_izena=estropada_izena,
+                      liga=liga,
+                      talde_izen_normalizatua=talde_izen_normalizatua,
+                     )
+    return emaitza
 
 class EmaitzakLogic:
     @staticmethod
@@ -16,6 +33,7 @@ class EmaitzakLogic:
         izena = talde_izen_normalizatua.replace(' ', '-')
         emaitza['_id'] = f'{emaitza['estropada_data'].strftime("%Y-%m-%d")}_{emaitza["liga"].value}_{izena}'
         del emaitza['id']
+        logger.info(f"Creating new emaitza {emaitza['_id']}")
         emaitza_ = Emaitza(**emaitza)
         doc_created = await asyncio.to_thread(emaitzak.insert_emaitza_into_db, emaitza_)
         return doc_created
@@ -38,7 +56,7 @@ class EmaitzakLogic:
                 estropada_id=estropada.id,
                 liga=estropada.liga,
                 talde_izen_normalizatua=talde_izen_normalizatua,
-                **emaitza.model_dump(),
+                **emaitza.model_dump(exclude_none=True),
             )
             emaitzak.insert_emaitza_into_db(emaitza_)
         return True
