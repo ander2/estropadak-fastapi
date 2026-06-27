@@ -11,8 +11,9 @@ logger = logging.getLogger(DEFAULT_LOGGER)
 
 
 def get_emaitza_id(estropada: Estropada, talde_izena: str) -> str:
-    talde_izena = talde_izena.replace(' ', '-')
-    id = f'{estropada.data.strftime("%Y-%m-%d")}_{estropada.liga}_{talde_izena}'
+    taldea = taldeak.get_talde_izena(talde_izena)
+    taldea = taldea.replace(' ', '-')
+    id = f'{estropada.data.strftime("%Y-%m-%d")}_{estropada.liga}_{taldea}'
     return id
 
 async def create_emaitza(new_emaitza: EmbedEmaitza, estropada_id: str, estropada_izena: str, estropada_data: datetime, liga: str) -> Emaitza:

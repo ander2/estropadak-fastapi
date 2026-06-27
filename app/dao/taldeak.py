@@ -69,7 +69,7 @@ def get_talde_izena(taldea):
     talde_izena = ''
     talde_izenak = {}
     with get_db_connection() as database:
-        res = database.get_document('talde_izenak2')
+        res = database.get_document(config["DBNAME"], 'talde_izenak2')
         talde_izenak2 = res.get_result()
         for k, v in talde_izenak2.items():
             if k.startswith('_'):
