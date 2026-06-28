@@ -370,7 +370,7 @@ def test_estropada_modification_with_sailkapena(credentials, create_estropada):
         "data": "2021-06-02 17:30",
         "liga": "ARC1",
         "sailkapena": [{
-            "talde_izena": "ARKOTE SEGUROS BILBAO",
+            "talde_izena": "Arkote Seguros Bilbao",
             "denbora": "20:14,84",
             "puntuazioa": 5,
             "posizioa": 8,

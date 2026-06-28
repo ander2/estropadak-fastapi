@@ -19,7 +19,7 @@ def get_emaitza_by_id(id) -> Emaitza:
             msg = f"Emaitza document with id {id} not found"
             logging.info(msg)
             raise NotFoundError(msg)
-        return emaitza
+        return Emaitza(**emaitza)
 
 
 def get_emaitzak_by_league_year(league, year, team=None):

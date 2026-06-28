@@ -17,7 +17,7 @@ def get_emaitza_id(estropada: Estropada, talde_izena: str) -> str:
     return id
 
 async def create_emaitza(new_emaitza: EmbedEmaitza, estropada_id: str, estropada_izena: str, estropada_data: datetime, liga: str) -> Emaitza:
-    talde_izen_normalizatua = await asyncio.to_thread(taldeak.get_talde_izen_normalizatua, new_emaitza.talde_izena)
+    talde_izen_normalizatua = await asyncio.to_thread(taldeak.get_talde_izena, new_emaitza.talde_izena)
     emaitza = Emaitza(**new_emaitza.model_dump(exclude_none=True),
                       estropada_data=estropada_data,
                       estropada_id=estropada_id,
@@ -30,7 +30,7 @@ async def create_emaitza(new_emaitza: EmbedEmaitza, estropada_id: str, estropada
 class EmaitzakLogic:
     @staticmethod
     async def create_emaitza(emaitza: dict):
-        talde_izen_normalizatua = await asyncio.to_thread(taldeak.get_talde_izen_normalizatua, emaitza['talde_izena'])
+        talde_izen_normalizatua = await asyncio.to_thread(taldeak.get_talde_izena, emaitza['talde_izena'])
         izena = talde_izen_normalizatua.replace(' ', '-')
         emaitza['_id'] = f'{emaitza['estropada_data'].strftime("%Y-%m-%d")}_{emaitza["liga"].value}_{izena}'
         del emaitza['id']
@@ -47,7 +47,7 @@ class EmaitzakLogic:
     @staticmethod
     def create_emaitzak_from_estropada(estropada: Estropada):
         for emaitza in estropada.sailkapena:
-            talde_izen_normalizatua = taldeak.get_talde_izen_normalizatua(emaitza.talde_izena)
+            talde_izen_normalizatua = taldeak.get_talde_izena(emaitza.talde_izena)
             izena = talde_izen_normalizatua.replace(' ', '-')
             id = f'{estropada.data.strftime("%Y-%m-%d")}_{estropada.liga}_{izena}'
             emaitza_ = Emaitza(

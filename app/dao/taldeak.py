@@ -9,7 +9,7 @@ from .db_connection import get_db_connection
 logger = logging.getLogger(DEFAULT_LOGGER)
 
 
-def get_taldeak(league, year=None, category=None):
+def get_taldeak(league: str, year: str | None = None, category: str | None = None) -> list[dict]:
     league = league.upper()
 
     taldeak = []
@@ -54,18 +54,7 @@ def get_taldeak(league, year=None, category=None):
         return taldeak
 
 
-def get_talde_izen_normalizatua(taldea):
-    with get_db_connection() as database:
-        res = database.get_document(config["DBNAME"], 'talde_izenak')
-        talde_izenak = res.get_result()
-        try:
-            talde_izena = talde_izenak[taldea]
-        except KeyError:
-            talde_izena = talde_izenak[taldea.title()]
-        return talde_izena
-
-
-def get_talde_izena(taldea):
+def get_talde_izena(taldea: str) -> str:
     talde_izena = ''
     talde_izenak = {}
     with get_db_connection() as database:
@@ -75,11 +64,14 @@ def get_talde_izena(taldea):
             if k.startswith('_'):
                 continue
             for alt_name in v['alt_names']:
-                talde_izenak[alt_name] = k
+                talde_izenak[alt_name.lower()] = k
 
-        try:
-            talde_izena = talde_izenak[taldea]
-        except ApiException as e:
-            logger.error(f"Cannot find talde_izenak2 document: {e}")
-            talde_izena = talde_izenak[taldea.title()]
+        talde_izena = talde_izenak.get(taldea.lower())
+        if not talde_izena:
+            s = 0
+            for k in talde_izenak.keys():
+                simmilarity = textdistance.hamming.similarity(k, taldea.lower())
+                if simmilarity > s:
+                    s = simmilarity
+                    talde_izena = k
     return talde_izena
